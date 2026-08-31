@@ -1,0 +1,91 @@
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  border-width: 1px;
+  border-style: solid;
+  line-height: 1;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+
+  .badge-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 13px;
+      height: 13px;
+    }
+  }
+
+  &.size-sm {
+    padding: 3px 8px;
+    font-size: 0.725rem;
+
+    .badge-icon svg {
+      width: 11px;
+      height: 11px;
+    }
+  }
+
+  &.size-md {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+
+    .badge-icon svg {
+      width: 13px;
+      height: 13px;
+    }
+  }
+
+  &.size-lg {
+    padding: 6px 14px;
+    font-size: 0.875rem;
+
+    .badge-icon svg {
+      width: 15px;
+      height: 15px;
+    }
+  }
+
+  /* Status Colors matching tokens */
+  &.badge-unchanged {
+    background-color: var(--color-unchanged-bg);
+    color: var(--color-unchanged);
+    border-color: var(--color-unchanged-border);
+  }
+
+  &.badge-changed {
+    background-color: var(--color-changed-bg);
+    color: #D97706; /* slightly darker amber for high contrast text */
+    border-color: var(--color-changed-border);
+  }
+
+  &.badge-added {
+    background-color: var(--color-added-bg);
+    color: var(--color-added);
+    border-color: var(--color-added-border);
+  }
+
+  &.badge-removed {
+    background-color: var(--color-removed-bg);
+    color: var(--color-removed);
+    border-color: var(--color-removed-border);
+  }
+
+  &.badge-variation {
+    background-color: var(--color-variation-bg);
+    color: var(--color-variation);
+    border-color: var(--color-variation-border);
+  }
+
+  &.badge-neutral {
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text-muted);
+    border-color: var(--color-border);
+  }
+}
