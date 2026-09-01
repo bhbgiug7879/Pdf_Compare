@@ -11,6 +11,7 @@ import {
 } from './models/compare.model';
 import { PdfExtractService } from './services/pdf-extract.service';
 import { PdfCompareService } from './services/pdf-compare.service';
+import Analytics from '@vercel/analytics';
 
 @Component({
   selector: 'app-root',
@@ -55,6 +56,7 @@ export class AppComponent implements OnInit {
     this.presets = this.pdfCompareService.SAMPLE_PRESETS;
     // Load default sample preset (Invoice v1 vs Invoice v2)
     this.loadPreset(this.presets[0]);
+    Analytics.inject();
   }
 
   // Hover & Visual PDF Inspector State
