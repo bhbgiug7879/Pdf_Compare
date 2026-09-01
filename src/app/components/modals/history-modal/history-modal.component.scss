@@ -1,0 +1,205 @@
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 1.5rem;
+}
+
+.modal-dialog {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 650px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      .modal-icon {
+        font-size: 1.5rem;
+      }
+
+      h3 {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--color-text);
+      }
+
+      .header-sub {
+        font-size: 0.775rem;
+        color: var(--color-text-muted);
+      }
+    }
+
+    .btn-close {
+      font-size: 1.2rem;
+      color: var(--color-text-muted);
+      cursor: pointer;
+
+      &:hover {
+        color: var(--color-text);
+      }
+    }
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+
+      .history-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: var(--color-bg-subtle);
+        border: 1px solid var(--color-border);
+        border-radius: 12px;
+        padding: 0.85rem 1rem;
+        transition: all 0.2s ease;
+
+        &:hover {
+          border-color: var(--color-primary-border);
+        }
+
+        .item-icon-box {
+          font-size: 1.5rem;
+          flex-shrink: 0;
+        }
+
+        .item-details {
+          flex: 1;
+          min-width: 0;
+
+          .item-top {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+
+            .tool-tag {
+              font-size: 0.7rem;
+              font-weight: 800;
+              color: var(--color-primary);
+              background: var(--color-primary-light);
+              padding: 2px 6px;
+              border-radius: 4px;
+            }
+
+            .time-tag {
+              font-size: 0.725rem;
+              color: var(--color-text-muted);
+            }
+          }
+
+          .item-file-name {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--color-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 0.2rem;
+          }
+
+          .item-meta {
+            display: flex;
+            gap: 0.75rem;
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+
+            .savings-tag {
+              color: var(--color-unchanged);
+              font-weight: 700;
+            }
+          }
+        }
+
+        .item-actions {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          .remove-btn {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 4px;
+
+            &:hover {
+              color: var(--color-removed);
+              background: var(--color-removed-bg);
+            }
+          }
+        }
+      }
+    }
+
+    .empty-history {
+      text-align: center;
+      padding: 3.5rem 1.5rem;
+
+      .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 0.75rem;
+      }
+
+      h4 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin-bottom: 0.25rem;
+      }
+
+      p {
+        font-size: 0.85rem;
+        color: var(--color-text-muted);
+      }
+    }
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg-subtle);
+
+    .text-danger {
+      color: var(--color-removed);
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}

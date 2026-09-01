@@ -1,0 +1,37 @@
+<div class="modal-backdrop" (click)="close.emit()">
+  <div class="modal-dialog animate-fade-in" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="header-left">
+        <div class="modal-icon">💡</div>
+        <h3>Help Center & Guides</h3>
+      </div>
+      <button class="btn-close" (click)="close.emit()">✕</button>
+    </div>
+
+    <div class="modal-search">
+      <input 
+        type="text" 
+        placeholder="Search tutorials & guides..." 
+        [(ngModel)]="searchQuery" 
+        class="search-input"
+      />
+    </div>
+
+    <div class="modal-body">
+      <div class="articles-list">
+        <div *ngFor="let article of filteredArticles" class="article-card">
+          <div class="card-meta">
+            <span class="art-cat">{{ article.cat }}</span>
+          </div>
+          <h4>{{ article.title }}</h4>
+          <p>{{ article.text }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <span>Need direct assistance? Contact <strong>support@pdfmaster.app</strong></span>
+      <button class="btn btn-secondary btn-sm" (click)="close.emit()">Close</button>
+    </div>
+  </div>
+</div>

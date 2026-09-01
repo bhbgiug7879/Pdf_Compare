@@ -1,0 +1,111 @@
+<div class="modal-backdrop" (click)="close.emit()">
+  <div class="modal-dialog animate-fade-in" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="header-left">
+        <div class="modal-icon">🎧</div>
+        <div>
+          <h3>Raise Complaint & Contact Support</h3>
+          <span class="header-sub">We respond within 15–30 minutes</span>
+        </div>
+      </div>
+      <button class="btn-close" (click)="close.emit()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- State 1: Complaint Form -->
+      <div *ngIf="!isSubmitted" class="contact-form">
+        <div class="direct-chat-callout">
+          <div class="chat-text">
+            <strong>Need instant resolution?</strong>
+            <span>Chat directly with Surya on WhatsApp (Payment, UTR, Pro Key verification)</span>
+          </div>
+          <a [href]="whatsAppComplaintUrl" target="_blank" class="btn-whatsapp">
+            💬 WhatsApp Surya
+          </a>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Your Name</label>
+            <input 
+              type="text" 
+              placeholder="Full Name" 
+              [(ngModel)]="fullName" 
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email or Phone Number</label>
+            <input 
+              type="text" 
+              placeholder="e.g. yourname@email.com or +91..." 
+              [(ngModel)]="emailOrPhone" 
+              class="form-input"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Category of Issue</label>
+          <select [(ngModel)]="issueCategory" class="form-select">
+            <option value="Payment & Pro Key Issue">💳 Payment & Pro Key Issue (₹299)</option>
+            <option value="File Processing Bug">🐞 File Processing Bug / Tool Error</option>
+            <option value="Large File Limit Issue">📁 File Size / Batch Limit Question</option>
+            <option value="Feature Request">💡 Feature Request / Improvement</option>
+            <option value="Other">❓ Other Inquiry</option>
+          </select>
+        </div>
+
+        <div class="form-group" *ngIf="issueCategory.includes('Payment')">
+          <label class="form-label">Bank UTR / Transaction Reference (if paid)</label>
+          <input 
+            type="text" 
+            placeholder="12-digit UTR Number" 
+            [(ngModel)]="utrReference" 
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Detailed Description of Complaint / Issue</label>
+          <textarea 
+            rows="4" 
+            placeholder="Please describe what happened, tool used, or what assistance is needed..." 
+            [(ngModel)]="description" 
+            class="form-textarea"
+          ></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button 
+            class="btn btn-primary btn-lg btn-full" 
+            [disabled]="isSubmitting || !description.trim()"
+            (click)="submitComplaint()"
+          >
+            <span *ngIf="!isSubmitting">Submit Support Ticket</span>
+            <span *ngIf="isSubmitting">Submitting Ticket...</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- State 2: Submitted Confirmation Screen -->
+      <div *ngIf="isSubmitted" class="submitted-confirmation animate-fade-in">
+        <div class="confirm-icon">✅</div>
+        <h3>Complaint Ticket Logged!</h3>
+        <div class="ticket-badge">Ticket Reference: {{ ticketId }}</div>
+        <p>
+          Thank you. Your request has been forwarded to our support queue. You will receive an email/WhatsApp update shortly.
+        </p>
+        <div class="confirm-actions">
+          <a [href]="whatsAppComplaintUrl" target="_blank" class="btn btn-primary">
+            💬 Send Copy to WhatsApp
+          </a>
+          <button class="btn btn-secondary" (click)="resetForm()">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,430 @@
+<div class="tool-page-wrapper" *ngIf="tool">
+  <!-- Top Breadcrumb & Header Section -->
+  <section class="tool-hero-section">
+    <div class="tool-header-container">
+      <div class="breadcrumb-nav">
+        <a routerLink="/">Home</a>
+        <span>/</span>
+        <a [routerLink]="['/category', tool.category]">{{ tool.category }}</a>
+        <span>/</span>
+        <span class="current">{{ tool.name }}</span>
+      </div>
+
+      <div class="tool-title-row">
+        <div class="tool-icon-large" [style.background]="tool.iconBg" [style.color]="tool.accentColor">
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+        </div>
+        <div class="title-details">
+          <div class="badge-row">
+            <span *ngIf="tool.badge" class="tool-pill" [style.color]="tool.accentColor" [style.background]="tool.iconBg">
+              {{ tool.badge }}
+            </span>
+            <span class="privacy-pill">🔒 100% Client-Side Privacy</span>
+          </div>
+          <h1 class="main-h1">{{ tool.h1 }}</h1>
+          <p class="hero-subtitle">{{ tool.heroSubtitle }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Workspace Area -->
+  <section class="tool-workspace-section">
+    <div class="workspace-container">
+      <!-- Error Message Banner -->
+      <div class="error-banner animate-fade-in" *ngIf="errorMessage">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <!-- State 1: Upload Dropzone (When no files or adding more) -->
+      <div 
+        class="dropzone-box" 
+        *ngIf="uploadedFiles.length === 0 && !processedResult"
+        [class.dragging]="isDragging"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+      >
+        <div class="dropzone-inner">
+          <div class="upload-icon-circle">
+            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <h3 class="dropzone-title">
+            Drag & drop {{ tool.acceptsMultipleFiles ? 'PDF files' : 'your file' }} here
+          </h3>
+          <p class="dropzone-subtitle">
+            or click to browse from your device
+          </p>
+          <label class="btn btn-primary btn-lg upload-btn">
+            <span>Choose {{ tool.acceptsMultipleFiles ? 'Files' : 'File' }}</span>
+            <input 
+              type="file" 
+              [multiple]="tool.acceptsMultipleFiles" 
+              (change)="onFileInput($event)" 
+              style="display: none;"
+            />
+          </label>
+          <div class="dropzone-footnote">
+            Supports {{ tool.acceptedFileTypes.join(', ') }} up to 100MB • Zero server upload
+          </div>
+        </div>
+      </div>
+
+      <!-- State 2: File Uploaded & Interactive Options Panel -->
+      <div class="workspace-active-card animate-fade-in" *ngIf="uploadedFiles.length > 0 && !processedResult">
+        <div class="workspace-layout">
+          <!-- Left Column: File List / Thumbnails -->
+          <div class="files-preview-col">
+            <div class="preview-header">
+              <h3>Uploaded {{ uploadedFiles.length === 1 ? 'Document' : 'Documents (' + uploadedFiles.length + ')' }}</h3>
+              <label *ngIf="tool.acceptsMultipleFiles" class="btn btn-secondary btn-sm">
+                <span>+ Add More</span>
+                <input type="file" multiple (change)="onFileInput($event)" style="display: none;" />
+              </label>
+            </div>
+
+            <!-- Multi-file list (For Merge, Multi-Image, etc.) -->
+            <div class="files-stack" *ngIf="uploadedFiles.length > 1 || !pageThumbnails.length">
+              <div *ngFor="let fileItem of uploadedFiles; let i = index" class="file-stack-item">
+                <div class="file-icon-badge">PDF</div>
+                <div class="file-meta">
+                  <div class="file-name">{{ fileItem.name }}</div>
+                  <div class="file-size">{{ (fileItem.size / 1024).toFixed(1) }} KB</div>
+                </div>
+                <div class="file-actions">
+                  <button *ngIf="i > 0" class="action-btn" (click)="moveFileUp(i)" title="Move Up">↑</button>
+                  <button *ngIf="i < uploadedFiles.length - 1" class="action-btn" (click)="moveFileDown(i)" title="Move Down">↓</button>
+                  <button class="action-btn text-danger" (click)="removeFile(i)" title="Remove">✕</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Page Thumbnail Grid (For Split, Remove, Organize, Rotate) -->
+            <div class="thumbnails-grid-box" *ngIf="pageThumbnails.length > 0">
+              <div class="thumb-hint">
+                <span *ngIf="tool.id === 'remove-pages'">Click pages you want to <strong>remove</strong>:</span>
+                <span *ngIf="tool.id === 'extract-pages'">Click pages you want to <strong>extract</strong>:</span>
+                <span *ngIf="tool.id === 'organize-pdf' || tool.id === 'rotate-pdf'">Click rotate icon to adjust orientation:</span>
+              </div>
+              <div class="thumbs-grid">
+                <div 
+                  *ngFor="let thumb of pageThumbnails" 
+                  class="page-thumb-card"
+                  [class.deselected]="!thumb.selected && tool.id === 'remove-pages'"
+                  [class.selected-extract]="thumb.selected && tool.id === 'extract-pages'"
+                  [style.transform]="'rotate(' + thumb.rotation + 'deg)'"
+                >
+                  <div class="thumb-sheet" (click)="togglePageSelection(thumb)">
+                    <div class="sheet-lines">
+                      <div class="line"></div>
+                      <div class="line short"></div>
+                      <div class="line"></div>
+                    </div>
+                    <span class="page-num-badge">Page {{ thumb.pageNumber }}</span>
+                  </div>
+                  <button 
+                    class="rotate-thumb-btn" 
+                    (click)="rotateThumbnail(thumb)" 
+                    title="Rotate 90 degrees"
+                    *ngIf="tool.id === 'organize-pdf' || tool.id === 'rotate-pdf'"
+                  >
+                    ↻
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Tool Specific Options -->
+          <div class="options-col">
+            <div class="options-card">
+              <h3 class="options-title">{{ tool.name }} Settings</h3>
+
+              <!-- Tool Specific Options -->
+
+              <!-- 1. Compress Options -->
+              <div *ngIf="tool.id === 'compress-pdf'" class="option-group">
+                <label class="option-label">Compression Level</label>
+                <div class="preset-buttons">
+                  <button 
+                    class="preset-btn" 
+                    [class.active]="compressPreset === 'extreme'"
+                    (click)="compressPreset = 'extreme'"
+                  >
+                    <strong>Extreme</strong>
+                    <span>Lowest size, good quality (~60% savings)</span>
+                  </button>
+                  <button 
+                    class="preset-btn" 
+                    [class.active]="compressPreset === 'recommended'"
+                    (click)="compressPreset = 'recommended'"
+                  >
+                    <strong>Recommended</strong>
+                    <span>Best balance of quality and size</span>
+                  </button>
+                  <button 
+                    class="preset-btn" 
+                    [class.active]="compressPreset === 'light'"
+                    (click)="compressPreset = 'light'"
+                  >
+                    <strong>Light</strong>
+                    <span>Crisp clarity, mild compression</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 2. Split Options -->
+              <div *ngIf="tool.id === 'split-pdf'" class="option-group">
+                <label class="option-label">Page Ranges to Extract</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="splitRange" 
+                  placeholder="e.g. 1-3, 5, 8-10" 
+                  class="text-input"
+                />
+                <span class="input-hint">Specify comma-separated ranges or single page numbers.</span>
+              </div>
+
+              <!-- 3. Rotate Options -->
+              <div *ngIf="tool.id === 'rotate-pdf'" class="option-group">
+                <label class="option-label">Rotation Angle</label>
+                <div class="btn-group">
+                  <button class="btn btn-secondary btn-sm" [class.active]="rotateAngle === 90" (click)="rotateAngle = 90">90° Right ↻</button>
+                  <button class="btn btn-secondary btn-sm" [class.active]="rotateAngle === 270" (click)="rotateAngle = 270">90° Left ↺</button>
+                  <button class="btn btn-secondary btn-sm" [class.active]="rotateAngle === 180" (click)="rotateAngle = 180">180° Flip ⥯</button>
+                </div>
+              </div>
+
+              <!-- 4. Watermark Options -->
+              <div *ngIf="tool.id === 'add-watermark'" class="option-group">
+                <label class="option-label">Watermark Text</label>
+                <input type="text" [(ngModel)]="watermarkText" placeholder="e.g. CONFIDENTIAL" class="text-input" />
+                
+                <label class="option-label" style="margin-top: 1rem;">Transparency ({{ (watermarkOpacity * 100).toFixed(0) }}%)</label>
+                <input type="range" min="0.1" max="0.9" step="0.05" [(ngModel)]="watermarkOpacity" class="range-slider" />
+              </div>
+
+              <!-- 5. Page Numbers Options -->
+              <div *ngIf="tool.id === 'add-page-numbers'" class="option-group">
+                <label class="option-label">Placement Position</label>
+                <select [(ngModel)]="pageNumberPosition" class="select-input">
+                  <option value="bottom-center">Bottom Center</option>
+                  <option value="bottom-right">Bottom Right</option>
+                  <option value="bottom-left">Bottom Left</option>
+                  <option value="top-center">Top Center</option>
+                  <option value="top-right">Top Right</option>
+                </select>
+
+                <label class="option-label" style="margin-top: 1rem;">Format Style</label>
+                <select [(ngModel)]="pageNumberFormat" class="select-input">
+                  <option value="Page 1 of N">Page 1 of N</option>
+                  <option value="1">1</option>
+                  <option value="Doc - 1">Doc - 1</option>
+                </select>
+              </div>
+
+              <!-- 6. Password Protect Options -->
+              <div *ngIf="tool.id === 'protect-pdf'" class="option-group">
+                <label class="option-label">Set Document Password</label>
+                <input type="password" [(ngModel)]="pdfPassword" placeholder="Enter secure password" class="text-input" />
+              </div>
+
+              <!-- 7. Unlock Password Options -->
+              <div *ngIf="tool.id === 'unlock-pdf'" class="option-group">
+                <label class="option-label">Enter Password (if protected)</label>
+                <input type="password" [(ngModel)]="pdfPassword" placeholder="Enter password to unlock" class="text-input" />
+              </div>
+
+              <!-- 8. Sign PDF Options -->
+              <div *ngIf="tool.id === 'sign-pdf'" class="option-group">
+                <label class="option-label">Signature Text</label>
+                <input type="text" [(ngModel)]="typedSignatureName" placeholder="Your Full Name" class="text-input" />
+                <div class="signature-preview-box">
+                  <span class="preview-sig-text">{{ typedSignatureName || 'Your Signature' }}</span>
+                </div>
+              </div>
+
+              <!-- 9. AI Summarizer Options -->
+              <div *ngIf="tool.id === 'ai-summarizer'" class="option-group">
+                <label class="option-label">Summary Detail Level</label>
+                <select [(ngModel)]="summaryDetailLevel" class="select-input">
+                  <option value="tldr">Quick TL;DR (Executive Summary)</option>
+                  <option value="standard">Standard (Key Takeaways & Action Items)</option>
+                  <option value="comprehensive">Comprehensive (Deep Sectional Breakdown)</option>
+                </select>
+              </div>
+
+              <!-- Processing Indicator -->
+              <div *ngIf="isProcessing" class="processing-progress-box">
+                <div class="progress-bar-track">
+                  <div class="progress-bar-fill" [style.width.%]="progressPercent"></div>
+                </div>
+                <div class="progress-status-text">
+                  <span>{{ progressStatus }}</span>
+                  <span>{{ progressPercent }}%</span>
+                </div>
+              </div>
+
+              <!-- Primary CTA Action Button -->
+              <div class="cta-action-box">
+                <button 
+                  class="btn btn-primary btn-lg btn-full"
+                  [disabled]="isProcessing || uploadedFiles.length === 0"
+                  (click)="executeToolAction()"
+                >
+                  <span *ngIf="!isProcessing">{{ tool.ctaText }}</span>
+                  <span *ngIf="isProcessing">Processing Document...</span>
+                </button>
+                <button class="btn btn-ghost btn-sm btn-full" (click)="resetWorkspace()" [disabled]="isProcessing">
+                  Cancel & Reset
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- State 3: Result Screen -->
+      <div class="result-screen-card animate-fade-in" *ngIf="processedResult">
+        <div class="result-celebration">
+          <div class="success-icon-circle">✓</div>
+          <h2 class="result-headline">Your file is ready!</h2>
+          <p class="result-subtext">{{ processedResult.message }}</p>
+
+          <!-- Savings visualization for compression -->
+          <div class="savings-badge-box" *ngIf="processedResult.originalSize && processedResult.newSize">
+            <div class="savings-stat">
+              <span class="stat-label">Original:</span>
+              <span class="stat-val">{{ (processedResult.originalSize / 1024).toFixed(1) }} KB</span>
+            </div>
+            <div class="savings-arrow">→</div>
+            <div class="savings-stat">
+              <span class="stat-label">New Size:</span>
+              <span class="stat-val highlight">{{ (processedResult.newSize / 1024).toFixed(1) }} KB</span>
+            </div>
+          </div>
+
+          <!-- Text Preview for Markdown / Summarizer -->
+          <div class="text-output-preview" *ngIf="processedResult.textOutput">
+            <div class="output-header">
+              <span>Structured Output</span>
+              <button class="btn btn-secondary btn-sm" (click)="copyOutputText()">Copy to Clipboard</button>
+            </div>
+            <pre class="output-pre font-mono">{{ processedResult.textOutput }}</pre>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="result-actions-row">
+            <button class="btn btn-primary btn-lg" (click)="downloadResult()">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Download {{ processedResult.fileName }}</span>
+            </button>
+            <button class="btn btn-secondary btn-lg" (click)="resetWorkspace()">
+              <span>Process Another File</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Related Tools Suggestions -->
+      <div class="related-tools-section" *ngIf="relatedTools.length > 0">
+        <h3 class="related-title">You Might Also Need</h3>
+        <div class="related-grid">
+          <a *ngFor="let relTool of relatedTools" [routerLink]="['/', relTool.slug]" class="related-tool-card">
+            <div class="rel-icon-box" [style.color]="relTool.accentColor" [style.background]="relTool.iconBg">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              </svg>
+            </div>
+            <div class="rel-info">
+              <h4>{{ relTool.name }}</h4>
+              <p>{{ relTool.shortDescription }}</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEO Supporting Content Section -->
+  <section class="tool-seo-content-section">
+    <div class="seo-container">
+      <!-- Section 1: Detailed Overview -->
+      <div class="seo-block">
+        <h2>What is {{ tool.name }}?</h2>
+        <p>{{ tool.longDescription }}</p>
+      </div>
+
+      <!-- Section 2: Step by Step Numbered Guide -->
+      <div class="seo-block">
+        <h2>How to Use {{ tool.name }} (Step-by-Step)</h2>
+        <div class="steps-list">
+          <div *ngFor="let step of tool.steps; let idx = index" class="step-card">
+            <div class="step-number">{{ idx + 1 }}</div>
+            <div class="step-details">
+              <h3>{{ step.title }}</h3>
+              <p>{{ step.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Core Features & Benefits -->
+      <div class="seo-block">
+        <h2>Key Features of Our Online {{ tool.name }}</h2>
+        <div class="features-grid">
+          <div *ngFor="let feat of tool.features" class="feature-card">
+            <div class="feat-icon-box">✓</div>
+            <div class="feat-details">
+              <h4>{{ feat.title }}</h4>
+              <p>{{ feat.desc }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: FAQs Accordion -->
+      <div class="seo-block" *ngIf="tool.faqs.length > 0">
+        <h2>Frequently Asked Questions</h2>
+        <div class="faq-accordion">
+          <div *ngFor="let faq of tool.faqs; let i = index" class="faq-item">
+            <button class="faq-question-btn" (click)="toggleFaq(i)">
+              <span>{{ faq.question }}</span>
+              <span class="faq-chevron" [class.rotated]="faqOpenMap[i]">▾</span>
+            </button>
+            <div class="faq-answer-panel" *ngIf="faqOpenMap[i]">
+              <p>{{ faq.answer }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: Trust & Privacy Statement -->
+      <div class="seo-trust-footer">
+        <div class="trust-shield-icon">🛡️</div>
+        <div class="trust-footer-text">
+          <h3>Your Privacy is Guaranteed</h3>
+          <p>
+            This tool processes your PDF files locally on your computer or mobile device using WebAssembly technology. Your files are not transmitted to or stored on any server, ensuring complete confidentiality.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

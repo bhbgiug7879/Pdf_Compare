@@ -1,0 +1,50 @@
+<div class="modal-backdrop" (click)="close.emit()">
+  <div class="modal-dialog animate-fade-in" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="header-left">
+        <div class="modal-icon">🛡️</div>
+        <h3>Security & Privacy Architecture</h3>
+      </div>
+      <button class="btn-close" (click)="close.emit()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="security-intro">
+        <p>
+          We believe confidential documents, financial statements, and contracts should never be transmitted across arbitrary servers. Here is how our architecture guarantees absolute privacy.
+        </p>
+      </div>
+
+      <div class="security-pillars">
+        <div class="pillar-card">
+          <div class="pillar-num">1</div>
+          <div class="pillar-info">
+            <h4>100% Client-Side WebAssembly Processing</h4>
+            <p>PDF manipulation algorithms run in your browser's private sandboxed memory via WebAssembly (WASM). Your bytes never traverse the internet.</p>
+          </div>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-num">2</div>
+          <div class="pillar-info">
+            <h4>Zero Data Retention & No Storage Disks</h4>
+            <p>Because processing occurs client-side, we have no backend databases storing your files. When you close the tab, all memory is instantly discarded.</p>
+          </div>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-num">3</div>
+          <div class="pillar-info">
+            <h4>No AI Training on User Documents</h4>
+            <p>Your documents are never harvested or fed to train public AI models. All diff comparisons and text extraction are isolated in your session.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <span>Enterprise compliant with GDPR, HIPAA, and CCPA standards</span>
+      <button class="btn btn-primary btn-sm" (click)="close.emit()">I Understand</button>
+    </div>
+  </div>
+</div>

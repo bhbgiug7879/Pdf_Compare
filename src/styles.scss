@@ -1,4 +1,5 @@
 @import './styles/theme';
+@import './styles/variables';
 
 /* CSS Reset & Base */
 *, *::before, *::after {
@@ -37,10 +38,16 @@ body {
 
 /* Typography Helpers */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-ui);
+  font-family: var(--font-heading);
   color: var(--color-text);
   font-weight: 700;
   line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-weight: 800;
+  letter-spacing: -0.03em;
 }
 
 p {
@@ -89,6 +96,7 @@ button {
   background: none;
   font-size: inherit;
   transition: all var(--transition-fast);
+  touch-action: manipulation;
 
   &:focus-visible {
     outline: 2px solid var(--color-primary);
@@ -102,6 +110,7 @@ button {
   justify-content: center;
   gap: var(--space-1);
   padding: 0.65rem 1.25rem;
+  min-height: 42px;
   font-weight: 600;
   font-size: 0.925rem;
   border-radius: var(--radius-md);
@@ -161,18 +170,21 @@ button {
 
   &.btn-sm {
     padding: 0.45rem 0.85rem;
+    min-height: 36px;
     font-size: 0.825rem;
     gap: 5px;
   }
 
   &.btn-lg {
     padding: 0.85rem 1.85rem;
+    min-height: 48px;
     font-size: 1rem;
     border-radius: var(--radius-lg);
 
     @media (max-width: 640px) {
       padding: 0.75rem 1.25rem;
       font-size: 0.95rem;
+      min-height: 44px;
     }
   }
 
@@ -216,4 +228,15 @@ button {
 
 .animate-scan {
   animation: scanLine 2s ease-in-out infinite;
+}
+
+/* Mobile responsive utilities */
+@media (max-width: 640px) {
+  .hide-mobile {
+    display: none !important;
+  }
+  
+  .stack-mobile {
+    flex-direction: column !important;
+  }
 }

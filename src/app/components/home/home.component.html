@@ -1,0 +1,253 @@
+<div class="home-wrapper">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-container">
+      <div class="hero-badge animate-fade-in">
+        <span class="badge-sparkle">✨</span>
+        <span>The All-in-One Privacy-First PDF Suite</span>
+      </div>
+
+      <h1 class="hero-title animate-fade-in">
+        Every PDF Tool You Need, <br class="title-break">
+        <span class="gradient-text">100% Free & Browser-Powered.</span>
+      </h1>
+
+      <p class="hero-subtitle animate-fade-in">
+        Merge, split, compress, convert, edit, e-sign, and compare PDFs with zero file uploads to external servers. Lightning-fast client-side WebAssembly processing.
+      </p>
+
+      <!-- Instant Live Search Bar -->
+      <div class="hero-search-box animate-fade-in">
+        <div class="search-bar-inner">
+          <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input 
+            type="text" 
+            placeholder="Search a PDF tool... (e.g. merge, compress, protect, ocr, diff)"
+            [value]="searchQuery"
+            (input)="onSearchChange($any($event.target).value)"
+            class="hero-search-input"
+          />
+          <button *ngIf="searchQuery" class="clear-search-btn" (click)="onSearchChange('')">✕</button>
+        </div>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="category-pills-bar animate-fade-in">
+        <button 
+          class="cat-pill" 
+          [class.active]="selectedCategory === 'all'"
+          (click)="setCategoryFilter('all')"
+        >
+          <span>All Tools</span>
+          <span class="pill-count">{{ allTools.length }}</span>
+        </button>
+
+        <button 
+          *ngFor="let cat of categories" 
+          class="cat-pill"
+          [class.active]="selectedCategory === cat.id"
+          (click)="setCategoryFilter(cat.id)"
+        >
+          <span>{{ cat.name }}</span>
+          <span class="pill-count">{{ toolRegistry.getToolsByCategory(cat.id).length }}</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Tools Grid Section -->
+  <section class="tools-grid-section">
+    <div class="section-container">
+      <div class="grid-header" *ngIf="selectedCategory !== 'all' || searchQuery">
+        <h2 class="grid-title">
+          <span *ngIf="selectedCategory === 'all'">Search Results ({{ filteredTools.length }})</span>
+          <span *ngIf="selectedCategory !== 'all'">{{ toolRegistry.getCategoryById($any(selectedCategory))?.name }} Tools</span>
+        </h2>
+        <p class="grid-desc" *ngIf="selectedCategory !== 'all'">
+          {{ toolRegistry.getCategoryById($any(selectedCategory))?.description }}
+        </p>
+      </div>
+
+      <!-- Tool Cards Grid -->
+      <div class="tools-grid">
+        <a 
+          *ngFor="let tool of filteredTools" 
+          [routerLink]="['/', tool.slug]" 
+          class="tool-card animate-fade-in"
+        >
+          <div class="card-top">
+            <div class="tool-icon-wrapper" [style.background]="tool.iconBg" [style.color]="tool.accentColor">
+              <!-- Render Specific Vector Icons based on Tool Category / ID -->
+              <svg *ngIf="tool.icon === 'copy'" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <svg *ngIf="tool.icon === 'scissors'" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="6" cy="6" r="3"></circle>
+                <circle cx="6" cy="18" r="3"></circle>
+                <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+                <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+                <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+              </svg>
+              <svg *ngIf="tool.icon === 'minimize-2'" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="4 14 10 14 10 20"></polyline>
+                <polyline points="20 10 14 10 14 4"></polyline>
+                <line x1="14" y1="10" x2="21" y2="3"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+              </svg>
+              <svg *ngIf="tool.icon === 'image'" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <svg *ngIf="tool.icon === 'file-text'" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+              <svg *ngIf="tool.icon === 'rotate-cw'" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
+              <svg *ngIf="tool.icon === 'lock'" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              <svg *ngIf="tool.icon === 'unlock'" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+              </svg>
+              <svg *ngIf="tool.icon === 'pen-tool'" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                <path d="M2 2l7.586 7.586"></path>
+                <circle cx="11" cy="11" r="2"></circle>
+              </svg>
+              <svg *ngIf="tool.icon === 'git-pull-request'" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="18" r="3"></circle>
+                <circle cx="6" cy="6" r="3"></circle>
+                <path d="M13 6h3a2 2 0 0 1 2 2v7"></path>
+                <line x1="6" y1="9" x2="6" y2="21"></line>
+              </svg>
+              <svg *ngIf="tool.icon === 'cpu'" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                <rect x="9" y="9" width="6" height="6"></rect>
+                <line x1="9" y1="1" x2="9" y2="4"></line>
+                <line x1="15" y1="1" x2="15" y2="4"></line>
+                <line x1="9" y1="20" x2="9" y2="23"></line>
+                <line x1="15" y1="20" x2="15" y2="23"></line>
+                <line x1="20" y1="9" x2="23" y2="9"></line>
+                <line x1="20" y1="14" x2="23" y2="14"></line>
+                <line x1="1" y1="9" x2="4" y2="9"></line>
+                <line x1="1" y1="14" x2="4" y2="14"></line>
+              </svg>
+              <!-- Default Icon Fallback -->
+              <svg *ngIf="!['copy', 'scissors', 'minimize-2', 'image', 'file-text', 'rotate-cw', 'lock', 'unlock', 'pen-tool', 'git-pull-request', 'cpu'].includes(tool.icon)" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+            </div>
+            <span *ngIf="tool.badge" class="tool-badge" [style.color]="tool.accentColor" [style.background]="tool.iconBg">
+              {{ tool.badge }}
+            </span>
+          </div>
+
+          <div class="card-body">
+            <h3 class="tool-name">{{ tool.name }}</h3>
+            <p class="tool-desc">{{ tool.shortDescription }}</p>
+          </div>
+
+          <div class="card-footer">
+            <span class="tool-cta-label">Use Tool</span>
+            <svg class="arrow-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </div>
+        </a>
+      </div>
+
+      <div *ngIf="filteredTools.length === 0" class="empty-search-state">
+        <div class="empty-icon">🔍</div>
+        <h3>No matching PDF tools found</h3>
+        <p>Try searching for terms like "merge", "split", "compress", "word", or "sign".</p>
+        <button class="btn btn-secondary btn-sm" (click)="onSearchChange(''); setCategoryFilter('all')">Reset Search</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Compare PDF Featured Banner -->
+  <section class="featured-banner-section">
+    <div class="section-container">
+      <div class="diff-spotlight-card">
+        <div class="spotlight-content">
+          <div class="spotlight-badge">AI POWERED COMPARISON</div>
+          <h2>Automate Tedious Manual Document Comparisons</h2>
+          <p>
+            Upload two PDF versions and get an instant field-by-field difference audit with synchronized side-by-side visual redlines. Replaces hours of manual contract and invoice reviews in seconds.
+          </p>
+          <div class="spotlight-actions">
+            <a routerLink="/compare-pdf" class="btn btn-primary btn-lg">
+              <span>Launch AI Compare Engine</span>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div class="spotlight-graphic">
+          <div class="diff-graphic-box">
+            <div class="diff-line removed">- Section 3.2: Net 30 Payment Terms (Original)</div>
+            <div class="diff-line added">+ Section 3.2: Net 15 Payment Terms (Revised)</div>
+            <div class="diff-line unchanged">  Section 3.3: Governing Law (California)</div>
+            <div class="diff-line changed">~ Invoice Total: $14,250.00 → $16,800.00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Homepage SEO FAQ Section -->
+  <section class="home-faq-section">
+    <div class="section-container">
+      <div class="section-header-center">
+        <h2>Frequently Asked Questions</h2>
+        <p>Learn how our privacy-first browser PDF engine processes your documents safely.</p>
+      </div>
+
+      <div class="faq-grid">
+        <div class="faq-card">
+          <h4>Are my documents stored or saved on your servers?</h4>
+          <p>
+            No. Our core suite uses client-side WebAssembly (WASM) and HTML5 Canvas technologies to parse and modify PDFs directly in your web browser memory. Your files are never stored or uploaded to external storage disks.
+          </p>
+        </div>
+
+        <div class="faq-card">
+          <h4>Is this PDF tool suite completely free to use?</h4>
+          <p>
+            Yes! You can merge, split, compress, edit, convert, and sign PDF documents as a guest with zero mandatory account sign-up requirements.
+          </p>
+        </div>
+
+        <div class="faq-card">
+          <h4>Does this work on mobile devices and iPads?</h4>
+          <p>
+            Absolutely. Our responsive layout and tap-to-upload interface are optimized for iOS, iPadOS, Android, and all modern mobile web browsers.
+          </p>
+        </div>
+
+        <div class="faq-card">
+          <h4>How does the AI PDF Compare tool work?</h4>
+          <p>
+            Our AI diff engine parses text coordinates, clause hierarchies, and table cells between two PDF documents to compute additions, deletions, and value modifications with redline highlights.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

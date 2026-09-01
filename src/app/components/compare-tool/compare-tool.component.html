@@ -1,0 +1,286 @@
+<div class="compare-page-wrapper">
+  <!-- Top Hero Header -->
+  <section class="compare-hero">
+    <div class="header-container">
+      <div class="breadcrumb-nav">
+        <a routerLink="/">Home</a>
+        <span>/</span>
+        <a routerLink="/category/security">Security & Diff</a>
+        <span>/</span>
+        <span class="current">Compare PDF</span>
+      </div>
+
+      <div class="hero-content-row">
+        <div class="diff-icon-box">
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+        </div>
+        <div class="hero-details">
+          <div class="badge-row">
+            <span class="ai-badge">AI DIFF ENGINE</span>
+            <span class="privacy-badge">🔒 100% Client-Side Privacy</span>
+          </div>
+          <h1>Compare PDF Files Online Free</h1>
+          <p class="hero-desc">
+            Instantly detect differences between two PDF document versions — field by field, clause by clause with synchronized side-by-side redlines.
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Sample Presets -->
+      <div class="presets-row">
+        <span class="preset-label">Try instant sample:</span>
+        <div class="preset-chips">
+          <button 
+            *ngFor="let preset of presets" 
+            class="preset-chip" 
+            (click)="loadPreset(preset)"
+          >
+            <span>📄 {{ preset.title }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Upload & Document Dropzone Area -->
+  <section class="compare-workspace">
+    <div class="workspace-container">
+      <div class="drop-slots-grid">
+        <!-- Slot 1: Original Document -->
+        <div class="doc-slot-card">
+          <div class="slot-header">
+            <span class="slot-tag tag-doc1">Document 1 (Original)</span>
+            <button *ngIf="documents[0]" class="slot-remove-btn" (click)="removeDocument(documents[0].id)">✕ Remove</button>
+          </div>
+
+          <div *ngIf="!documents[0]" class="slot-dropzone" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <h4>Upload Original PDF</h4>
+            <label class="btn btn-secondary btn-sm">
+              <span>Choose File</span>
+              <input type="file" accept=".pdf" (change)="onFilesSelected($event)" style="display: none;" />
+            </label>
+          </div>
+
+          <div *ngIf="documents[0]" class="slot-content">
+            <div class="doc-meta-bar">
+              <strong>{{ documents[0].fileName }}</strong>
+              <span>{{ documents[0].fileSize || 'PDF' }}</span>
+            </div>
+            <pre class="doc-text-preview font-mono">{{ documents[0].content }}</pre>
+          </div>
+        </div>
+
+        <!-- Slot 2: Revised Document -->
+        <div class="doc-slot-card">
+          <div class="slot-header">
+            <span class="slot-tag tag-doc2">Document 2 (Revised)</span>
+            <button *ngIf="documents[1]" class="slot-remove-btn" (click)="removeDocument(documents[1].id)">✕ Remove</button>
+          </div>
+
+          <div *ngIf="!documents[1]" class="slot-dropzone" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <h4>Upload Revised PDF</h4>
+            <label class="btn btn-secondary btn-sm">
+              <span>Choose File</span>
+              <input type="file" accept=".pdf" (change)="onFilesSelected($event)" style="display: none;" />
+            </label>
+          </div>
+
+          <div *ngIf="documents[1]" class="slot-content">
+            <div class="doc-meta-bar">
+              <strong>{{ documents[1].fileName }}</strong>
+              <span>{{ documents[1].fileSize || 'PDF' }}</span>
+            </div>
+            <pre class="doc-text-preview font-mono">{{ documents[1].content }}</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button & Step Indicator -->
+      <div class="compare-action-bar">
+        <button 
+          class="btn btn-primary btn-lg" 
+          [disabled]="!canCompare"
+          (click)="runComparison()"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <span *ngIf="!isComparing">Compare Documents</span>
+          <span *ngIf="isComparing">{{ comparisonStepLabel }}</span>
+        </button>
+      </div>
+
+      <!-- Comparison Result Section -->
+      <div class="results-container animate-fade-in" *ngIf="compareResponse">
+        <!-- Result Tabs & Metric Summary Bar -->
+        <div class="results-header-card">
+          <div class="tabs-row">
+            <button 
+              class="result-tab-btn" 
+              [class.active]="activeResultTab === 'report'"
+              (click)="activeResultTab = 'report'"
+            >
+              📊 Diff Report Table
+            </button>
+            <button 
+              class="result-tab-btn" 
+              [class.active]="activeResultTab === 'side-by-side'"
+              (click)="activeResultTab = 'side-by-side'"
+            >
+              🔍 Side-by-Side Inspector
+            </button>
+            <button 
+              class="result-tab-btn" 
+              [class.active]="activeResultTab === 'raw-prompt'"
+              (click)="activeResultTab = 'raw-prompt'"
+            >
+              📝 Summary & JSON
+            </button>
+          </div>
+
+          <!-- Quick Metrics Badges -->
+          <div class="metrics-row" *ngIf="compareResponse.summary">
+            <div class="metric-pill">
+              <span class="m-label">Total Compared:</span>
+              <span class="m-val">{{ compareResponse.summary.totalFieldsCompared }}</span>
+            </div>
+            <div class="metric-pill text-changed">
+              <span class="m-label">Values Changed:</span>
+              <span class="m-val">{{ compareResponse.summary.valueChanged }}</span>
+            </div>
+            <div class="metric-pill text-added">
+              <span class="m-label">Added:</span>
+              <span class="m-val">{{ compareResponse.summary.added }}</span>
+            </div>
+            <div class="metric-pill text-removed">
+              <span class="m-label">Removed:</span>
+              <span class="m-val">{{ compareResponse.summary.removed }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 1: Diff Report Table -->
+        <div *ngIf="activeResultTab === 'report'" class="tab-pane animate-fade-in">
+          <!-- Filters & Search Toolbar -->
+          <div class="table-toolbar">
+            <div class="status-filters">
+              <button 
+                class="filter-chip" 
+                [class.active]="selectedStatusFilter === 'all'"
+                (click)="selectedStatusFilter = 'all'"
+              >
+                All ({{ compareResponse.differences.length }})
+              </button>
+              <button 
+                class="filter-chip" 
+                [class.active]="selectedStatusFilter === 'value_changed'"
+                (click)="selectedStatusFilter = 'value_changed'"
+              >
+                Changed ({{ compareResponse.summary.valueChanged }})
+              </button>
+              <button 
+                class="filter-chip" 
+                [class.active]="selectedStatusFilter === 'added'"
+                (click)="selectedStatusFilter = 'added'"
+              >
+                Added ({{ compareResponse.summary.added }})
+              </button>
+              <button 
+                class="filter-chip" 
+                [class.active]="selectedStatusFilter === 'removed'"
+                (click)="selectedStatusFilter = 'removed'"
+              >
+                Removed ({{ compareResponse.summary.removed }})
+              </button>
+            </div>
+
+            <input 
+              type="text" 
+              placeholder="Search diff items..." 
+              [(ngModel)]="searchQuery" 
+              class="diff-search-input"
+            />
+          </div>
+
+          <!-- Interactive Diff Table -->
+          <div class="diff-table-card">
+            <table class="diff-table">
+              <thead>
+                <tr>
+                  <th style="width: 140px;">Status</th>
+                  <th style="width: 220px;">Field / Clause</th>
+                  <th>{{ doc1Name }}</th>
+                  <th>{{ doc2Name }}</th>
+                  <th style="width: 180px;">AI Analysis</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr 
+                  *ngFor="let diff of filteredDiffItems"
+                  (mouseenter)="onHoverDiff(diff)"
+                  (click)="selectDiff(diff)"
+                  [class.active-row]="isDiffActive(diff)"
+                >
+                  <td>
+                    <span class="status-badge" [attr.data-status]="diff.status">
+                      {{ diff.status }}
+                    </span>
+                  </td>
+                  <td class="font-bold">{{ diff.fieldName }}</td>
+                  <td class="font-mono text-removed">{{ diff.valueInFile1 || '—' }}</td>
+                  <td class="font-mono text-added">{{ diff.valueInFile2 || '—' }}</td>
+                  <td class="note-text">{{ diff.changeSummary || 'Discrepancy detected' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 2: Synchronized Side-by-Side Visual Redline Inspector -->
+        <div *ngIf="activeResultTab === 'side-by-side'" class="tab-pane animate-fade-in">
+          <div class="side-by-side-grid">
+            <div class="side-pane">
+              <div class="pane-header">{{ doc1Name }} (Original)</div>
+              <div class="pane-body">
+                <pre class="pane-text font-mono">{{ documents[0].content }}</pre>
+              </div>
+            </div>
+            <div class="side-pane">
+              <div class="pane-header">{{ doc2Name }} (Revised)</div>
+              <div class="pane-body">
+                <pre class="pane-text font-mono">{{ documents[1].content }}</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: Summary & JSON -->
+        <div *ngIf="activeResultTab === 'raw-prompt'" class="tab-pane animate-fade-in">
+          <div class="summary-card">
+            <div class="summary-actions">
+              <h3>Executive Audit Summary</h3>
+              <div class="btn-group">
+                <button class="btn btn-secondary btn-sm" (click)="copySummary()">Copy Summary</button>
+                <button class="btn btn-secondary btn-sm" (click)="copyJson()">Export JSON</button>
+              </div>
+            </div>
+            <p *ngIf="copyFeedback" class="copy-feedback-toast">{{ copyFeedback }}</p>
+            <pre class="summary-text">{{ compareResponse.renderedOutput }}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

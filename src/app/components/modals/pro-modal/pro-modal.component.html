@@ -1,0 +1,273 @@
+<div class="modal-backdrop" (click)="close.emit()">
+  <div class="modal-dialog animate-fade-in" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="header-left">
+        <div class="modal-icon">👑</div>
+        <div>
+          <h3>Upgrade to PDF Master Pro</h3>
+          <span class="header-sub">One-time ₹{{ proPriceInr }} • Lifetime Access • Admin Verified</span>
+        </div>
+      </div>
+      <button class="btn-close" (click)="close.emit()">✕</button>
+    </div>
+
+    <!-- Progress Steps Tracker -->
+    <div class="steps-tracker-bar" *ngIf="currentStep !== 'activated'">
+      <div class="step-node" [class.active]="currentStep === 'details'" [class.done]="currentStep !== 'details'">
+        <span class="node-num">1</span>
+        <span class="node-label">Your Details</span>
+      </div>
+      <div class="step-connector" [class.active]="currentStep !== 'details'"></div>
+      <div class="step-node" [class.active]="currentStep === 'payment'" [class.done]="currentStep === 'pending_approval' || currentStep === 'enter_key'">
+        <span class="node-num">2</span>
+        <span class="node-label">Pay ₹{{ proPriceInr }}</span>
+      </div>
+      <div class="step-connector" [class.active]="currentStep === 'pending_approval' || currentStep === 'enter_key'"></div>
+      <div class="step-node" [class.active]="currentStep === 'pending_approval' || currentStep === 'enter_key'">
+        <span class="node-num">3</span>
+        <span class="node-label">Admin Approval</span>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <!-- Dynamic Limit Reached Alert Banner -->
+      <div *ngIf="triggerReason && currentStep !== 'activated'" class="limit-alert-banner animate-fade-in">
+        <div class="alert-icon">⚡</div>
+        <div class="alert-text">
+          <strong>Limit Notice:</strong>
+          <span>{{ triggerReason }}</span>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           STEP 1: USER DETAILS REGISTRATION
+           ========================================== -->
+      <div *ngIf="currentStep === 'details'" class="step-content animate-fade-in">
+        <div class="benefits-summary-box">
+          <div class="benefit-tag">✨ Unlimited Batch Files (up to 50 files)</div>
+          <div class="benefit-tag">📁 250 MB Large Files</div>
+          <div class="benefit-tag">🔍 Unlimited AI Compare</div>
+          <div class="benefit-tag">⚡ Pure WASM Speed</div>
+        </div>
+
+        <h4 class="step-heading">Step 1: Enter User Details for Pro License</h4>
+        <p class="step-subheading">Your official Pro activation key will be linked to your name and phone number.</p>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Full Name <span class="required">*</span></label>
+            <input 
+              type="text" 
+              placeholder="e.g. Rahul Sharma" 
+              [(ngModel)]="userName" 
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email Address <span class="required">*</span></label>
+            <input 
+              type="email" 
+              placeholder="e.g. rahul@example.com" 
+              [(ngModel)]="userEmail" 
+              class="form-input"
+            />
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">WhatsApp / Phone Number <span class="required">*</span></label>
+            <input 
+              type="tel" 
+              placeholder="10-digit mobile number" 
+              [(ngModel)]="userPhone" 
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Company / Organization (Optional)</label>
+            <input 
+              type="text" 
+              placeholder="e.g. TechCorp / Individual" 
+              [(ngModel)]="userCompany" 
+              class="form-input"
+            />
+          </div>
+        </div>
+
+        <div *ngIf="detailsError" class="error-banner animate-fade-in">{{ detailsError }}</div>
+
+        <div class="step-actions">
+          <button class="btn btn-ghost btn-sm" (click)="openKeyEntry()">
+            Already have an approved license key?
+          </button>
+          <button class="btn btn-primary btn-lg" (click)="proceedToPayment()">
+            Proceed to Payment (₹{{ proPriceInr }}) →
+          </button>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           STEP 2: UPI PAYMENT & 12-DIGIT UTR INPUT
+           ========================================== -->
+      <div *ngIf="currentStep === 'payment'" class="step-content animate-fade-in">
+        <div class="user-summary-badge">
+          <span>Licensing for: <strong>{{ userName }}</strong> ({{ userPhone }})</span>
+          <button class="edit-link" (click)="editUserDetails()">Edit Details</button>
+        </div>
+
+        <div class="payment-box">
+          <div class="qr-col">
+            <img [src]="dynamicQrUrl" alt="Scan UPI QR" class="qr-img" />
+            <span class="upi-id-badge">UPI: {{ upiId }}</span>
+            <span class="payee-tag">Payee: {{ payeeName }}</span>
+          </div>
+
+          <div class="form-col">
+            <div class="price-callout">
+              <span class="old-price">₹999</span>
+              <span class="new-price">₹{{ proPriceInr }}</span>
+              <span class="discount-badge">70% OFF Lifetime Access</span>
+            </div>
+
+            <p class="instruction">
+              Scan QR using GPay / PhonePe / Paytm / BHIM to pay <strong>₹{{ proPriceInr }}</strong>. Once paid, enter the <strong>12-digit Bank UTR</strong> reference number below:
+            </p>
+
+            <div class="form-group">
+              <label class="form-label">12-Digit Bank UTR / Transaction Reference <span class="required">*</span></label>
+              <input 
+                type="text" 
+                placeholder="e.g. 423984102938" 
+                [(ngModel)]="enteredUtr" 
+                class="form-input utr-field"
+                maxlength="20"
+              />
+            </div>
+
+            <div *ngIf="utrError" class="error-banner animate-fade-in">{{ utrError }}</div>
+
+            <div class="payment-actions-row">
+              <button 
+                class="btn btn-primary btn-lg btn-full" 
+                [disabled]="paymentSubmitting || !enteredUtr.trim()"
+                (click)="submitUtrForApproval()"
+              >
+                <span *ngIf="!paymentSubmitting">Submit Payment for Admin Verification →</span>
+                <span *ngIf="paymentSubmitting">Submitting Request...</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           STEP 3: PENDING ADMIN APPROVAL STATE
+           ========================================== -->
+      <div *ngIf="currentStep === 'pending_approval'" class="step-content pending-state animate-fade-in">
+        <div class="status-clock-box">
+          <div class="pending-icon">⏳</div>
+          <span class="pending-badge">Pending Admin Verification</span>
+        </div>
+
+        <h3>Payment Submitted & Under Review</h3>
+        <p class="pending-desc">
+          Your UTR reference <strong>{{ pendingRequest?.utrNumber }}</strong> has been logged under Request ID <strong>{{ pendingRequest?.requestId }}</strong>. Admin (Surya) is verifying the ₹{{ proPriceInr }} credit.
+        </p>
+
+        <div class="whatsapp-prompt-card">
+          <div class="prompt-icon">💬</div>
+          <div class="prompt-text">
+            <strong>Fast-Track Instant Approval on WhatsApp:</strong>
+            <span>Send your payment screenshot / UTR directly to Admin Surya for 5-minute approval.</span>
+          </div>
+          <a [href]="whatsAppVerificationUrl" target="_blank" class="btn btn-whatsapp">
+            Send Proof to Surya (+91 7010199142)
+          </a>
+        </div>
+
+        <div class="pending-key-box">
+          <p class="key-sub-instruction">Received your approved license key from Surya?</p>
+          <div class="input-group">
+            <input 
+              type="text" 
+              placeholder="Paste Approved License Key (e.g. SURYA-MASTER-7010)" 
+              [(ngModel)]="enteredKey" 
+              class="form-input"
+            />
+            <button class="btn btn-primary" (click)="activateLicenseKey()" [disabled]="keySubmitting">
+              <span *ngIf="!keySubmitting">Activate Pro</span>
+              <span *ngIf="keySubmitting">Verifying...</span>
+            </button>
+          </div>
+          <div *ngIf="keyError" class="error-banner animate-fade-in">{{ keyError }}</div>
+        </div>
+
+        <!-- Admin Quick Unlock Portal -->
+        <div class="admin-portal-link">
+          <button class="link-btn" (click)="showAdminLogin = !showAdminLogin">
+            ⚙️ Admin / Owner Login (Surya)
+          </button>
+          <div *ngIf="showAdminLogin" class="admin-pass-box animate-fade-in">
+            <input 
+              type="password" 
+              placeholder="Enter Admin PIN (7010)" 
+              [(ngModel)]="adminPasscode" 
+              class="form-input admin-input" 
+            />
+            <button class="btn btn-secondary btn-sm" (click)="verifyAdminPasscode()">Verify & Unlock Pro</button>
+            <span *ngIf="adminError" class="admin-err">{{ adminError }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           DIRECT ENTER KEY STATE
+           ========================================== -->
+      <div *ngIf="currentStep === 'enter_key'" class="step-content animate-fade-in">
+        <h4 class="step-heading">Enter Approved Pro License Key</h4>
+        <p class="step-subheading">Enter the official license key issued by Admin Surya after ₹{{ proPriceInr }} verification.</p>
+
+        <div class="form-group">
+          <label class="form-label">License Key</label>
+          <input 
+            type="text" 
+            placeholder="e.g. SURYA-MASTER-7010" 
+            [(ngModel)]="enteredKey" 
+            class="form-input key-field"
+          />
+        </div>
+
+        <div *ngIf="keyError" class="error-banner animate-fade-in">{{ keyError }}</div>
+
+        <div class="step-actions">
+          <button class="btn btn-ghost btn-sm" (click)="currentStep = 'details'">
+            ← Back to Payment
+          </button>
+          <button class="btn btn-primary btn-lg" (click)="activateLicenseKey()" [disabled]="keySubmitting">
+            <span *ngIf="!keySubmitting">Activate License</span>
+            <span *ngIf="keySubmitting">Validating...</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           SUCCESS ACTIVATED STATE
+           ========================================== -->
+      <div *ngIf="currentStep === 'activated'" class="success-state animate-fade-in">
+        <div class="success-icon">🎉</div>
+        <h3>Pro License Activated & Verified!</h3>
+        <div class="active-badge-pill">✓ LIFETIME UNLIMITED ACCESS ENABLED</div>
+        <p class="success-desc">
+          Welcome to PDF Master Pro! All batch limits, file size caps, and AI diff comparison features are permanently unlocked on your device.
+        </p>
+        <button class="btn btn-primary btn-lg" (click)="close.emit()">
+          Start Using Pro Platform
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,201 @@
+<header class="navbar-wrapper">
+  <div class="navbar-container">
+    <!-- Brand / Logo -->
+    <a routerLink="/" class="brand-logo" (click)="closeCategoryMenu(); closeMobileMenu()">
+      <div class="logo-icon-box">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">PDF <span class="brand-highlight">MASTER</span></span>
+        <span class="brand-badge">PRO SUITE</span>
+      </div>
+    </a>
+
+    <!-- Global Search Bar with Live Suggestions Dropdown -->
+    <div class="nav-search-container">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input 
+          type="text" 
+          placeholder="Search any PDF tool (e.g. merge, compress, sign, diff)..."
+          [value]="searchQuery"
+          (input)="onSearchInput($event)"
+          (focus)="isSearchOpen = searchResults.length > 0"
+          class="search-input"
+        />
+        <span class="search-shortcut">⌘K</span>
+      </div>
+
+      <!-- Quick Search Dropdown -->
+      <div class="search-dropdown animate-fade-in" *ngIf="isSearchOpen && searchResults.length > 0">
+        <div class="search-results-list">
+          <div 
+            *ngFor="let item of searchResults" 
+            class="search-result-row"
+            (click)="selectTool(item)"
+          >
+            <div class="result-icon-box" [style.background]="item.iconBg" [style.color]="item.accentColor">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              </svg>
+            </div>
+            <div class="result-info">
+              <div class="result-name">{{ item.name }}</div>
+              <div class="result-desc">{{ item.shortDescription }}</div>
+            </div>
+            <span class="result-cat-badge">{{ item.category }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop Navigation Links -->
+    <nav class="nav-links-desktop">
+      <!-- All Tools Dropdown Trigger -->
+      <div class="menu-dropdown-wrapper">
+        <button class="nav-btn-dropdown" (click)="toggleCategoryMenu()" [class.active]="isCategoryMenuOpen">
+          <span>All PDF Tools</span>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+
+        <!-- Mega Menu Grid -->
+        <div class="mega-menu animate-fade-in" *ngIf="isCategoryMenuOpen" (mouseleave)="closeCategoryMenu()">
+          <div class="mega-menu-grid">
+            <div *ngFor="let cat of categories" class="mega-menu-col">
+              <div class="cat-header" (click)="navigateToCategory(cat)">
+                <span class="cat-title" [style.color]="cat.color">{{ cat.name }}</span>
+              </div>
+              <ul class="cat-tool-list">
+                <li *ngFor="let tool of toolRegistry.getToolsByCategory(cat.id)">
+                  <a [routerLink]="['/', tool.slug]" (click)="closeCategoryMenu()" class="tool-link">
+                    <span class="tool-bullet" [style.background]="tool.accentColor"></span>
+                    <span class="tool-title">{{ tool.name }}</span>
+                    <span *ngIf="tool.badge" class="mini-badge">{{ tool.badge }}</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <a routerLink="/compare-pdf" class="nav-link highlight-link" (click)="closeCategoryMenu()">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6"></polyline>
+          <polyline points="8 6 2 12 8 18"></polyline>
+        </svg>
+        <span>Compare AI</span>
+      </a>
+
+      <!-- History Trigger -->
+      <button class="nav-link-btn" (click)="openHistory.emit()" title="View Processed Document History">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span>History</span>
+        <span class="history-badge" *ngIf="(historyService.history$ | async)?.length as count">
+          {{ count }}
+        </span>
+      </button>
+
+      <!-- Raise Complaint / Support Trigger -->
+      <button class="nav-link-btn" (click)="openContact.emit()" title="Contact Support / Raise Complaint">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span>Support</span>
+      </button>
+    </nav>
+
+    <!-- Header Actions (Theme Switcher, Pro Upgrade, Mobile Hamburger) -->
+    <div class="nav-actions">
+      <!-- Dark / Light Theme Toggle -->
+      <button 
+        class="theme-toggle-btn" 
+        (click)="toggleTheme()" 
+        [title]="currentTheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+        aria-label="Toggle Dark/Light Theme"
+      >
+        <svg *ngIf="currentTheme === 'dark'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg *ngIf="currentTheme === 'light'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+
+      <!-- Upgrade Pro CTA Button -->
+      <button class="btn btn-pro btn-sm" (click)="openPro.emit()">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+        <span>Pro (₹299)</span>
+      </button>
+
+      <!-- Mobile Hamburger Button -->
+      <button class="mobile-toggle-btn" (click)="toggleMobileMenu()" aria-label="Toggle Navigation Menu">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Menu -->
+  <div class="mobile-drawer animate-fade-in" *ngIf="isMobileMenuOpen">
+    <div class="mobile-drawer-header">
+      <span class="drawer-title">Navigation & Tools</span>
+      <button class="drawer-close" (click)="closeMobileMenu()">✕</button>
+    </div>
+    
+    <div class="mobile-quick-actions">
+      <button class="btn btn-secondary btn-sm" (click)="closeMobileMenu(); openHistory.emit()">
+        🕒 History
+      </button>
+      <button class="btn btn-secondary btn-sm" (click)="closeMobileMenu(); openContact.emit()">
+        🎧 Support / Complaint
+      </button>
+    </div>
+
+    <div class="mobile-drawer-content">
+      <div *ngFor="let cat of categories" class="mobile-cat-group">
+        <div class="mobile-cat-title" (click)="navigateToCategory(cat)">
+          <span [style.color]="cat.color">{{ cat.name }}</span>
+        </div>
+        <div class="mobile-tools-grid">
+          <a 
+            *ngFor="let tool of toolRegistry.getToolsByCategory(cat.id)" 
+            [routerLink]="['/', tool.slug]" 
+            (click)="closeMobileMenu()" 
+            class="mobile-tool-item"
+          >
+            <span class="mobile-tool-dot" [style.background]="tool.accentColor"></span>
+            <span>{{ tool.name }}</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

@@ -1,0 +1,62 @@
+<div class="modal-backdrop" (click)="close.emit()">
+  <div class="modal-dialog animate-fade-in" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="header-left">
+        <div class="modal-icon">🕒</div>
+        <div>
+          <h3>Document Processing History</h3>
+          <span class="header-sub">Saved locally in your browser memory</span>
+        </div>
+      </div>
+      <button class="btn-close" (click)="close.emit()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div *ngIf="(historyService.history$ | async) as history">
+        <!-- History Items List -->
+        <div *ngIf="history.length > 0" class="history-list">
+          <div *ngFor="let item of history" class="history-item">
+            <div class="item-icon-box">📄</div>
+            <div class="item-details">
+              <div class="item-top">
+                <span class="tool-tag">{{ item.toolName }}</span>
+                <span class="time-tag">{{ formatTime(item.timestamp) }}</span>
+              </div>
+              <h4 class="item-file-name">{{ item.fileName }}</h4>
+              <div class="item-meta">
+                <span>{{ item.fileSizeFormatted }}</span>
+                <span *ngIf="item.originalSize && item.newSize" class="savings-tag">
+                  Saved {{ Math.round((1 - item.newSize / item.originalSize) * 100) }}%
+                </span>
+              </div>
+            </div>
+            <div class="item-actions">
+              <button class="btn btn-secondary btn-sm" (click)="openTool(item.toolSlug)">
+                Open Tool
+              </button>
+              <button class="remove-btn" (click)="historyService.removeItem(item.id)" title="Remove item">
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty History State -->
+        <div *ngIf="history.length === 0" class="empty-history">
+          <div class="empty-icon">📂</div>
+          <h4>No document history yet</h4>
+          <p>Your processed files and completed tasks will appear here for easy reference.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer" *ngIf="(historyService.history$ | async)?.length">
+      <button class="btn btn-ghost btn-sm text-danger" (click)="historyService.clearAll()">
+        Clear All History
+      </button>
+      <button class="btn btn-secondary btn-sm" (click)="close.emit()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
