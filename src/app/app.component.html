@@ -612,7 +612,7 @@
               <h4 class="panel-file-name" [title]="doc1Name">{{ doc1Name }}</h4>
             </div>
             <div class="panel-status-chip">
-              <span>{{ documents[0]?.pageCount || 1 }} page</span>
+              <span>{{ (documents[0] ? documents[0].pageCount : 1) }} page</span>
             </div>
           </div>
 
@@ -643,7 +643,7 @@
               <h4 class="panel-file-name" [title]="doc2Name">{{ doc2Name }}</h4>
             </div>
             <div class="panel-status-chip">
-              <span>{{ documents[1]?.pageCount || 1 }} page</span>
+              <span>{{ (documents[1] ? documents[1].pageCount : 1) }} page</span>
             </div>
           </div>
 
