@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://pdfcompare.ai/sitemap.xml
+Sitemap: https://pdf-compare-emqg.vercel.app/sitemap.xml
