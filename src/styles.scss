@@ -16,16 +16,23 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+
+  @media (max-width: 640px) {
+    font-size: 14px;
+  }
 }
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   background: radial-gradient(circle at 50% 0%, rgba(79, 70, 229, 0.05) 0%, transparent 60%),
               radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.04) 0%, transparent 50%),
               var(--color-bg);
   background-attachment: fixed;
   color: var(--color-text);
   overflow-x: hidden;
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 /* Typography Helpers */
@@ -150,6 +157,27 @@ button {
       background: var(--color-bg-subtle);
       color: var(--color-text);
     }
+  }
+
+  &.btn-sm {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.825rem;
+    gap: 5px;
+  }
+
+  &.btn-lg {
+    padding: 0.85rem 1.85rem;
+    font-size: 1rem;
+    border-radius: var(--radius-lg);
+
+    @media (max-width: 640px) {
+      padding: 0.75rem 1.25rem;
+      font-size: 0.95rem;
+    }
+  }
+
+  &.btn-full {
+    width: 100%;
   }
 
   &:disabled {
