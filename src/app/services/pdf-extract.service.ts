@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { PdfDocument } from '../models/compare.model';
 
 // Declare pdfjsLib in case it's loaded from global/window or npm
@@ -9,12 +10,19 @@ declare const pdfjsLib: any;
 })
 export class PdfExtractService {
   private pdfjsInitialized = false;
+  private isBrowser: boolean;
 
-  constructor() {
-    this.initPdfJs();
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+    if (this.isBrowser) {
+      this.initPdfJs();
+    }
   }
 
   private async initPdfJs(): Promise<any> {
+    if (!this.isBrowser) {
+      return null;
+    }
     if (this.pdfjsInitialized && (window as any).pdfjsLib) {
       return (window as any).pdfjsLib;
     }

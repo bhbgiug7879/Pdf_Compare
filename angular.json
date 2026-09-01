@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/pdfcompare",
+            "outputPath": "dist/pdfcompare/browser",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
@@ -27,7 +27,10 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              "src/robots.txt",
+              "src/sitemap.xml",
+              "src/manifest.webmanifest"
             ],
             "styles": [
               "src/styles.scss"
@@ -100,6 +103,65 @@
             ],
             "scripts": []
           }
+        },
+        "server": {
+          "builder": "@angular-devkit/build-angular:server",
+          "options": {
+            "outputPath": "dist/pdfcompare/server",
+            "main": "server.ts",
+            "tsConfig": "tsconfig.server.json",
+            "inlineStyleLanguage": "scss",
+            "externalDependencies": [
+              "pdfjs-dist",
+              "canvas"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "outputHashing": "media"
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "sourceMap": true,
+              "extractLicenses": false,
+              "vendorChunk": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve-ssr": {
+          "builder": "@nguniversal/builders:ssr-dev-server",
+          "configurations": {
+            "development": {
+              "browserTarget": "pdfcompare:build:development",
+              "serverTarget": "pdfcompare:server:development"
+            },
+            "production": {
+              "browserTarget": "pdfcompare:build:production",
+              "serverTarget": "pdfcompare:server:production"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "prerender": {
+          "builder": "@nguniversal/builders:prerender",
+          "options": {
+            "routes": [
+              "/"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "pdfcompare:build:production",
+              "serverTarget": "pdfcompare:server:production"
+            },
+            "development": {
+              "browserTarget": "pdfcompare:build:development",
+              "serverTarget": "pdfcompare:server:development"
+            }
+          },
+          "defaultConfiguration": "production"
         }
       }
     }

@@ -1,0 +1,26 @@
+{
+  "name": "PDF Compare AI – Find Differences Instantly",
+  "short_name": "PDF Compare AI",
+  "description": "Compare two or more PDF documents online free and instantly see what changed — field by field.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0F172A",
+  "theme_color": "#4F46E5",
+  "icons": [
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "assets/favicon.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -27,19 +27,20 @@
           [class.active]="currentPlan === 'pro'"
           (click)="setPlan('pro')">
           <span>Pro</span>
-          <span class="pro-sparkle">★</span>
+          <span *ngIf="isProActivated" class="pro-sparkle">★</span>
+          <span *ngIf="!isProActivated" class="pro-lock">🔒</span>
         </button>
       </div>
 
       <!-- Persistent Free Plan Usage Chip -->
-      <div *ngIf="currentPlan === 'free'" class="plan-usage-chip" (click)="openProUpgrade()">
+      <div *ngIf="currentPlan === 'free' && !isProActivated" class="plan-usage-chip" (click)="openProUpgrade()">
         <span class="usage-count">{{ documents.length }}/2 files</span>
         <span class="usage-divider">·</span>
         <span class="usage-cta">Upgrade for multi-file</span>
       </div>
 
       <!-- Pro Active Badge -->
-      <div *ngIf="currentPlan === 'pro'" class="pro-active-badge">
+      <div *ngIf="isProActivated && currentPlan === 'pro'" class="pro-active-badge">
         <span class="badge-dot"></span>
         <span>Pro Active · Unlimited Files</span>
       </div>
@@ -75,22 +76,6 @@
     <p class="hero-subtitle">
       Upload two or more PDF documents to detect field-by-field discrepancies, price revisions, term modifications, and added/removed clauses with zero hallucination.
     </p>
-
-    <!-- Preset Pills -->
-    <div class="presets-container">
-      <span class="presets-label">Quick Test Presets:</span>
-      <div class="preset-pills">
-        <button 
-          *ngFor="let p of presets" 
-          type="button" 
-          class="preset-pill"
-          (click)="loadPreset(p)">
-          <span class="preset-icon">📄</span>
-          <span>{{ p.title }}</span>
-          <span *ngIf="p.id === 'pro_multi'" class="pro-tag">PRO</span>
-        </button>
-      </div>
-    </div>
   </section>
 
   <!-- Uploader Section -->
@@ -665,11 +650,106 @@
     </div>
   </section>
 
-  <!-- Feature / SEO Content Section -->
-  <section class="seo-feature-section">
+  <!-- Comparison Showcase: Manual PDF Checking vs PDF Compare AI -->
+  <section id="manual-vs-ai" class="comparison-showcase-section">
+    <div class="section-badge">Why Automate?</div>
+    <h2 class="section-title">Manual PDF Comparison vs. PDF Compare AI</h2>
+    <p class="section-subtitle">
+      Stop spending hours alt-tabbing between documents and squinting at line items. See why thousands of teams replace manual proofreading with automated field-by-field diffing.
+    </p>
+
+    <div class="comparison-matrix-grid">
+      <!-- Card 1: Manual Review (Flawed / Slow) -->
+      <div class="comp-card comp-manual">
+        <div class="comp-card-header">
+          <div class="comp-badge badge-warning">Manual Document Review</div>
+          <h3>Traditional Human Proofreading</h3>
+          <p>Slow, exhausting, and prone to costly oversight errors.</p>
+        </div>
+        <ul class="comp-list">
+          <li class="comp-item comp-negative">
+            <span class="comp-icon">⏱️</span>
+            <div>
+              <strong>45+ minutes per document:</strong>
+              <span>Manually reading multi-page contracts, invoices, or financial statements line-by-line.</span>
+            </div>
+          </li>
+          <li class="comp-item comp-negative">
+            <span class="comp-icon">⚠️</span>
+            <div>
+              <strong>High risk of human oversight:</strong>
+              <span>Easily misses single-digit price changes, flipped date numbers, or omitted legal clauses.</span>
+            </div>
+          </li>
+          <li class="comp-item comp-negative">
+            <span class="comp-icon">🔄</span>
+            <div>
+              <strong>Exhausting window switching:</strong>
+              <span>Juggling split screens, dual monitors, or physical printouts with high eye strain.</span>
+            </div>
+          </li>
+          <li class="comp-item comp-negative">
+            <span class="comp-icon">📝</span>
+            <div>
+              <strong>Tedious manual audit trails:</strong>
+              <span>Having to manually write notes or mark up changes in separate email threads.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Card 2: PDF Compare AI (Fast / 100% Accurate) -->
+      <div class="comp-card comp-ai highlight-ai-card">
+        <div class="popular-glow"></div>
+        <div class="comp-card-header">
+          <div class="comp-badge badge-success">Automated Intelligence</div>
+          <h3>PDF Compare AI Engine</h3>
+          <p>Instant, deterministic, field-by-field diffing in under 2 seconds.</p>
+        </div>
+        <ul class="comp-list">
+          <li class="comp-item comp-positive">
+            <span class="comp-icon">⚡</span>
+            <div>
+              <strong>Instant 2-second extraction:</strong>
+              <span>Deterministic spatial parser reads tabular columns, key-value pairs, and body text in parallel.</span>
+            </div>
+          </li>
+          <li class="comp-item comp-positive">
+            <span class="comp-icon">🎯</span>
+            <div>
+              <strong>100% field precision:</strong>
+              <span>Zero hallucinations. Identifies Added, Removed, and Value-Changed items with exact before/after values.</span>
+            </div>
+          </li>
+          <li class="comp-item comp-positive">
+            <span class="comp-icon">🔍</span>
+            <div>
+              <strong>Synchronized side-by-side inspector:</strong>
+              <span>Interactive visual highlight tracking jumps straight to modified clauses across documents.</span>
+            </div>
+          </li>
+          <li class="comp-item comp-positive">
+            <span class="comp-icon">📊</span>
+            <div>
+              <strong>1-Click audit export:</strong>
+              <span>Instant download to formatted Markdown tables, JSON diff arrays, or copyable bullet feeds.</span>
+            </div>
+          </li>
+        </ul>
+        <div class="comp-cta-wrapper">
+          <button type="button" class="btn btn-primary btn-full" (click)="scrollToUpload()">
+            Try Instant PDF Comparison Free
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature / How It Works Section -->
+  <section id="how-it-works" class="seo-feature-section">
     <div class="section-badge">How It Works</div>
     <h2 class="section-title">Automate Document Verification in 3 Simple Steps</h2>
-    <p class="section-subtitle">Save hours of manual line-by-line proofreading with deterministic field diffing.</p>
+    <p class="section-subtitle">Save hours of manual proofreading with deterministic client-side diffing.</p>
 
     <div class="features-grid">
       <div class="feature-card">
@@ -695,49 +775,72 @@
     </div>
   </section>
 
-  <!-- SEO FAQ Accordion Section -->
-  <section class="seo-faq-section">
+  <!-- Interactive SEO FAQ Accordion Section -->
+  <section id="faq" class="seo-faq-section">
+    <div class="section-badge">Answers & Guidance</div>
     <h2 class="section-title">Frequently Asked Questions</h2>
-    <div class="faq-grid">
-      <div class="faq-card">
-        <h4>How does PDF Compare handle label variations?</h4>
-        <p>Our normalization engine recognizes synonyms like "Invoice Number" vs "Invoice No.", aligning them as the same entity while reporting the cosmetic label variation separately from numerical values.</p>
-      </div>
-      <div class="faq-card">
-        <h4>Are my uploaded documents secure and private?</h4>
-        <p>Yes. Text extraction and thumbnail generation happen 100% in your local browser sandbox. No sensitive document data is stored or logged to external servers.</p>
-      </div>
-      <div class="faq-card">
-        <h4>What is the difference between Free and Pro plans?</h4>
-        <p>The Free plan allows instant pairwise 2-file comparison with full table/JSON/summary exports. Pro unlocks multi-document diffing (3+ files at once), batch processing, and priority API rates.</p>
-      </div>
-      <div class="faq-card">
-        <h4>Can I compare scanned or OCR documents?</h4>
-        <p>Yes! The engine parses OCR text layers and flags extraction warnings if character streams are unreadable or incomplete.</p>
+    <p class="section-subtitle">Everything you need to know about comparing PDF documents online accurately and securely.</p>
+
+    <div class="faq-accordion-container">
+      <div 
+        *ngFor="let item of faqs; let i = index" 
+        class="faq-accordion-item" 
+        [class.is-open]="openFaqIndex === i">
+        <button 
+          type="button" 
+          class="faq-accordion-header" 
+          (click)="toggleFaq(i)"
+          [attr.aria-expanded]="openFaqIndex === i">
+          <span class="faq-question-text">{{ item.q }}</span>
+          <span class="faq-toggle-icon">{{ openFaqIndex === i ? '−' : '+' }}</span>
+        </button>
+        <div class="faq-accordion-body" *ngIf="openFaqIndex === i">
+          <p>{{ item.a }}</p>
+        </div>
       </div>
     </div>
   </section>
 </main>
 
-<!-- Footer -->
+<!-- Footer with Rich Semantic Navigation & Trust Badges -->
 <footer class="app-footer">
   <div class="footer-container">
     <div class="footer-left">
-      <div class="footer-brand font-mono">PDF Compare AI Engine</div>
-      <p>Precision field-by-field document diffing for contracts, invoices, and legal drafts.</p>
+      <div class="footer-brand font-mono">
+        <img src="assets/logo.svg" alt="PDF Compare AI" width="24" height="24" style="vertical-align: middle; margin-right: 8px;">
+        PDF Compare AI Engine
+      </div>
+      <p>Precision field-by-field document diffing for contracts, invoices, financial statements, and legal drafts.</p>
+      <div class="footer-trust-chips">
+        <span class="trust-chip">🔒 100% Client-Side Private</span>
+        <span class="trust-chip">⚡ Zero Cloud Uploads</span>
+        <span class="trust-chip">🎯 Zero Hallucination</span>
+      </div>
     </div>
-    <div class="footer-links">
-      <a href="javascript:void(0)" (click)="openProUpgrade()">Pro Upgrade</a>
-      <a href="javascript:void(0)" (click)="showApiKeyModal = true">System Prompt & API</a>
-      <a href="javascript:void(0)" (click)="scrollToUpload()">Compare Files</a>
+
+    <div class="footer-nav-groups">
+      <div class="footer-nav-col">
+        <h4>Navigation</h4>
+        <a href="#uploader-section" (click)="scrollToUpload()">Upload & Compare</a>
+        <a href="#manual-vs-ai">Manual vs AI</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="footer-nav-col">
+        <h4>Tools & Pro</h4>
+        <a href="javascript:void(0)" (click)="openProUpgrade()">Pro Multi-File Diff</a>
+        <a href="javascript:void(0)" (click)="showApiKeyModal = true">AI Engine Config</a>
+        <a href="javascript:void(0)" (click)="exportMarkdown()">Export Report</a>
+      </div>
     </div>
   </div>
+
   <div class="footer-bottom">
-    <span>© 2026 PDF Compare Tool. Fast, private, and deterministic.</span>
+    <span>© 2026 PDF Compare Tool. Built for automated document verification. Fast, private, and deterministic.</span>
   </div>
 </footer>
 
-<!-- MODAL 1: Pro Upgrade Modal -->
+<!-- MODAL 1: Pro Upgrade Modal with INR & GPay/UPI Payment Flow -->
 <div *ngIf="showProUpgradeModal" class="modal-backdrop animate-fade-in" (click)="showProUpgradeModal = false">
   <div class="modal-dialog pro-modal-dialog" (click)="$event.stopPropagation()">
     <button type="button" class="modal-close-btn" (click)="showProUpgradeModal = false">✕</button>
@@ -745,14 +848,24 @@
     <div class="pro-modal-header">
       <div class="pro-sparkle-badge">Upgrade to Pro</div>
       <h2>Unlock Multi-File Document Diffing</h2>
-      <p>Compare 3 or more documents simultaneously with unlimited pairwise matrices and batch export.</p>
+      <p>Compare 3 or more documents simultaneously with pairwise matrices, batch export, and priority processing.</p>
     </div>
 
-    <div class="pro-plans-comparison">
+    <!-- Payment Verified Success Banner -->
+    <div *ngIf="paymentVerified" class="payment-success-banner animate-fade-in">
+      <div class="success-icon">🎉</div>
+      <div>
+        <h4>Payment Verified Successfully!</h4>
+        <p>Your Pro Plan is now active with unlimited document slots.</p>
+      </div>
+    </div>
+
+    <div class="pro-plans-comparison" *ngIf="!paymentVerified">
+      <!-- Free Tier Card -->
       <div class="plan-col free-col">
         <div class="plan-col-header">
           <h3>Free Tier</h3>
-          <div class="plan-price">$0 <span>/ forever</span></div>
+          <div class="plan-price">₹0 <span>/ forever</span></div>
         </div>
         <ul class="plan-perks">
           <li>✓ 2 documents comparison</li>
@@ -765,21 +878,125 @@
         <button type="button" class="btn btn-secondary btn-full" (click)="showProUpgradeModal = false">Current Plan</button>
       </div>
 
+      <!-- Pro Tier Card with GPay / UPI QR Code -->
       <div class="plan-col pro-col highlight-plan">
         <div class="popular-ribbon">MOST POPULAR</div>
         <div class="plan-col-header">
-          <h3>Pro Plan</h3>
-          <div class="plan-price">$29 <span>/ month</span></div>
+          <div class="pro-title-row">
+            <h3>Pro Plan</h3>
+            <span class="pro-inr-tag">Instant Activation</span>
+          </div>
+          <div class="plan-price">₹{{ proPriceInr }} <span>/ month</span></div>
         </div>
+
         <ul class="plan-perks">
           <li>✓ <strong>Unlimited multi-file comparison</strong> (3+ files)</li>
-          <li>✓ Multi-vendor RFP bidding matrix</li>
-          <li>✓ CSV, JSON, Markdown exports</li>
+          <li>✓ Multi-vendor RFP & contract matrix</li>
+          <li>✓ Markdown, CSV, and JSON exports</li>
           <li>✓ Advanced semantic clause diffs</li>
           <li>✓ Priority Claude 3.5 Sonnet processing</li>
-          <li>✓ Automated redline change reports</li>
         </ul>
-        <button type="button" class="btn btn-pro btn-full" (click)="upgradeToPro()">Upgrade to Pro Now</button>
+
+        <!-- UPI / GPay QR Payment Card -->
+        <div class="upi-payment-box">
+          <div class="upi-header">
+            <span class="upi-label">Scan to Pay with Any UPI App</span>
+            <div class="upi-apps-icons">
+              <span class="upi-badge-pill">GPay</span>
+              <span class="upi-badge-pill">PhonePe</span>
+              <span class="upi-badge-pill">Paytm</span>
+              <span class="upi-badge-pill">BHIM</span>
+            </div>
+          </div>
+
+          <div class="upi-qr-wrapper">
+            <div class="upi-qr-frame">
+              <img 
+                [src]="dynamicQrUrl" 
+                (error)="$any($event.target).src = 'assets/gpay-qr.svg'"
+                alt="GPay UPI QR Code for {{ upiId }}" 
+                class="upi-qr-image" 
+                width="120" 
+                height="120">
+            </div>
+            <div class="upi-details">
+              <div class="upi-field">
+                <span class="detail-label">Verified Payee:</span>
+                <span class="upi-payee-name">{{ payeeName }} (SBI)</span>
+              </div>
+              <div class="upi-field">
+                <span class="detail-label">UPI ID:</span>
+                <div class="upi-copy-row">
+                  <span class="upi-id-text font-mono">{{ upiId }}</span>
+                  <button type="button" class="btn-copy-upi" (click)="copyUpiId()" title="Copy UPI ID">
+                    📋 Copy
+                  </button>
+                </div>
+              </div>
+              <div class="upi-field">
+                <span class="detail-label">Payable Amount:</span>
+                <span class="upi-amount-text font-bold">₹{{ proPriceInr }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Direct Mobile App Opener -->
+          <div class="upi-mobile-link-row">
+            <a [href]="upiPaymentString" class="btn-tap-upi">
+              📱 Tap to Open Directly in GPay / PhonePe App
+            </a>
+          </div>
+
+          <!-- Step 2: Verification Flow -->
+          <div class="upi-utr-section">
+            <div class="step-label-group">
+              <span class="step-badge">STEP 2</span>
+              <label class="control-label">Submit Payment Proof & Get Activation Key:</label>
+            </div>
+
+            <!-- UTR Input -->
+            <div class="utr-input-group mb-2">
+              <input 
+                type="text" 
+                [(ngModel)]="enteredUtr" 
+                (input)="onUtrInput()"
+                placeholder="1. Enter 12-Digit UTR (e.g. 423981293812)" 
+                maxlength="20"
+                class="utr-input font-mono" 
+                [class.input-error]="utrError" />
+              <a [href]="whatsAppProofUrl" target="_blank" class="btn btn-whatsapp-proof" title="Send UTR to Surya (+91 7010199142)">
+                💬 WhatsApp (+91 7010199142)
+              </a>
+            </div>
+
+            <!-- License Key Input (Only valid keys can activate) -->
+            <div class="license-key-group">
+              <input 
+                type="text" 
+                [(ngModel)]="enteredKey" 
+                (input)="onUtrInput()"
+                placeholder="2. Enter Pro Activation License Key" 
+                class="utr-input license-input font-mono font-bold" 
+                [class.input-error]="utrError" />
+              <button 
+                type="button" 
+                class="btn btn-pro btn-sm" 
+                [disabled]="paymentSubmitting"
+                (click)="verifyAndActivatePro()">
+                <span *ngIf="!paymentSubmitting">Verify & Unlock Pro</span>
+                <span *ngIf="paymentSubmitting">Verifying...</span>
+              </button>
+            </div>
+
+            <div *ngIf="utrError" class="utr-error-msg animate-fade-in">
+              {{ utrError }}
+            </div>
+
+            <div class="utr-help-hint">
+              🔒 <strong>Anti-Abuse Protected:</strong> Pro mode cannot be unlocked with random or unverified dummy numbers. Once payment is credited to <code>{{ upiId }}</code>, send your UTR proof to receive your activation key.
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

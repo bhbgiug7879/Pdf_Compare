@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pdfcompare.ai/sitemap.xml
