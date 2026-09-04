@@ -1,20 +1,9 @@
 import { Component, EventEmitter, Input, Output, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { CookieStorageService } from '../../../services/cookie-storage.service';
+import { FirebaseLicenseService, PendingProRequest, ProLicenseRecord, PricingPlan } from '../../../services/firebase-license.service';
 
 export type ProModalStep = 'details' | 'payment' | 'pending_approval' | 'enter_key' | 'activated';
-
-export interface PendingProRequest {
-  requestId: string;
-  userName: string;
-  userEmail: string;
-  userPhone: string;
-  userCompany?: string;
-  utrNumber: string;
-  amount: number;
-  submittedAt: number;
-  status: 'pending_admin_approval' | 'approved' | 'rejected';
-}
 
 @Component({
   selector: 'app-pro-modal',
@@ -34,6 +23,10 @@ export class ProModalComponent implements OnInit {
   payeeName: string = 'Suryarathiga';
   proPriceInr: number = 299;
   whatsAppNumber: string = '917010199142';
+
+  // Dynamic Plans from Firebase
+  availablePlans: PricingPlan[] = [];
+  selectedPlanId: string = 'pro_lifetime';
 
   // Step 1: User Details
   userName: string = '';
@@ -63,16 +56,6 @@ export class ProModalComponent implements OnInit {
   // Storage Keys
   private readonly PRO_ACTIVE_KEY = 'pdfcompare_pro_active';
   private readonly PRO_LICENSE_KEY = 'pdfcompare_license_key';
-  private readonly PENDING_REQ_KEY = 'pdf_pro_pending_request';
-
-  // STRICT Approved Master License Keys (No wildcard prefixes allowed!)
-  private readonly validMasterKeys: string[] = [
-    'SURYA-MASTER-7010',
-    'SBI-PRO-2026-VIP',
-    'PDFPRO-APPROVED-299',
-    'VIP-ENTERPRISE-SURYA',
-    'SURYA-RATHIGA-VIP-KEY'
-  ];
 
   get upiPaymentString(): string {
     return `upi://pay?pa=${this.upiId}&pn=${encodeURIComponent(this.payeeName)}&am=${this.proPriceInr}&cu=INR&tn=PDFMasterPro_${this.pendingRequest?.requestId || 'Upgrade'}`;
@@ -105,7 +88,8 @@ export class ProModalComponent implements OnInit {
 
   constructor(
     @Inject(PLATFORM_ID) platformId: Object,
-    private cookieStorage: CookieStorageService
+    private cookieStorage: CookieStorageService,
+    private licenseService: FirebaseLicenseService
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
   }
@@ -117,18 +101,29 @@ export class ProModalComponent implements OnInit {
         this.currentStep = 'activated';
         return;
       }
-
-      // Check for existing pending request in encoded cookies
-      const savedPending = this.cookieStorage.getObject<PendingProRequest>(this.PENDING_REQ_KEY);
-      if (savedPending) {
-        this.pendingRequest = savedPending;
-        this.userName = this.pendingRequest.userName;
-        this.userEmail = this.pendingRequest.userEmail;
-        this.userPhone = this.pendingRequest.userPhone;
-        this.enteredUtr = this.pendingRequest.utrNumber;
-        this.currentStep = 'pending_approval';
-      }
     }
+
+    // Load available active pricing plans
+    this.licenseService.getAllPlans().subscribe({
+      next: (plansMap) => {
+        if (plansMap && typeof plansMap === 'object') {
+          this.availablePlans = Object.values(plansMap)
+            .filter(p => p.isActive)
+            .sort((a, b) => a.amount - b.amount);
+
+          const defaultPlan = this.availablePlans.find(p => p.id === 'pro_lifetime') || this.availablePlans[0];
+          if (defaultPlan) {
+            this.selectedPlanId = defaultPlan.id;
+            this.proPriceInr = defaultPlan.amount;
+          }
+        }
+      }
+    });
+  }
+
+  selectPlan(plan: PricingPlan): void {
+    this.selectedPlanId = plan.id;
+    this.proPriceInr = plan.amount;
   }
 
   // STEP 1 -> STEP 2: Validate User Details
@@ -156,7 +151,7 @@ export class ProModalComponent implements OnInit {
     this.currentStep = 'payment';
   }
 
-  // STEP 2 -> STEP 3: Submit UTR for Admin Verification
+  // STEP 2 -> STEP 3: Submit UTR for Admin Verification in Firebase Database
   submitUtrForApproval(): void {
     this.utrError = null;
     const cleanUtr = this.enteredUtr.trim();
@@ -168,32 +163,39 @@ export class ProModalComponent implements OnInit {
 
     this.paymentSubmitting = true;
 
-    setTimeout(() => {
-      this.paymentSubmitting = false;
-      const reqId = 'REQ-' + Math.floor(100000 + Math.random() * 900000);
+    const matchedPlan = this.availablePlans.find(p => p.id === this.selectedPlanId);
+    const reqId = 'REQ-' + Math.floor(100000 + Math.random() * 900000);
+    const newRequest: PendingProRequest = {
+      requestId: reqId,
+      userName: this.userName.trim(),
+      userEmail: this.userEmail.trim(),
+      userPhone: this.userPhone.trim(),
+      userCompany: this.userCompany.trim() || undefined,
+      utrNumber: cleanUtr,
+      amount: this.proPriceInr,
+      submittedAt: Date.now(),
+      status: 'pending_admin_approval',
+      planId: this.selectedPlanId,
+      billingInterval: matchedPlan?.billingInterval || 'lifetime'
+    };
 
-      this.pendingRequest = {
-        requestId: reqId,
-        userName: this.userName.trim(),
-        userEmail: this.userEmail.trim(),
-        userPhone: this.userPhone.trim(),
-        userCompany: this.userCompany.trim() || undefined,
-        utrNumber: cleanUtr,
-        amount: this.proPriceInr,
-        submittedAt: Date.now(),
-        status: 'pending_admin_approval'
-      };
-
-      if (this.isBrowser) {
-        this.cookieStorage.setObject(this.PENDING_REQ_KEY, this.pendingRequest, 30);
+    // Store in Firebase Realtime Database directly (No cookies/localStorage)
+    this.licenseService.submitPaymentRequest(newRequest).subscribe({
+      next: () => {
+        this.paymentSubmitting = false;
+        this.pendingRequest = newRequest;
+        this.currentStep = 'pending_approval';
+      },
+      error: () => {
+        this.paymentSubmitting = false;
+        this.pendingRequest = newRequest;
+        this.currentStep = 'pending_approval';
       }
-
-      this.currentStep = 'pending_approval';
-    }, 600);
+    });
   }
 
-  // STRICT LICENSE KEY ACTIVATION (No dummy keys!)
-  activateLicenseKey(): void {
+  // STRICT LICENSE KEY ACTIVATION (Database-backed only - NO dummy keys!)
+  async activateLicenseKey(): Promise<void> {
     this.keyError = null;
     const key = this.enteredKey.trim().toUpperCase();
 
@@ -202,38 +204,31 @@ export class ProModalComponent implements OnInit {
       return;
     }
 
+    if (key.length < 8) {
+      this.keyError = '❌ Invalid key format. Pro keys are minimum 8 characters.';
+      return;
+    }
+
     this.keySubmitting = true;
 
-    setTimeout(() => {
+    try {
+      // Query Firebase Database for strict verification with user uniqueness check
+      const result = await this.licenseService.validateAndActivateLicense(key, {
+        userName: this.userName,
+        userEmail: this.userEmail,
+        userPhone: this.userPhone
+      });
       this.keySubmitting = false;
 
-      // Strict validation: must match exact master keys or matching hash
-      const isExactMasterKey = this.validMasterKeys.includes(key);
-      const isDynamicAdminApproved = this.isKeyApprovedForUser(key);
-
-      if (isExactMasterKey || isDynamicAdminApproved) {
-        if (this.isBrowser) {
-          this.cookieStorage.setItem(this.PRO_ACTIVE_KEY, 'true', 365);
-          this.cookieStorage.setItem(this.PRO_LICENSE_KEY, key, 365);
-          this.cookieStorage.removeItem(this.PENDING_REQ_KEY);
-        }
+      if (result.valid) {
         this.currentStep = 'activated';
       } else {
-        this.keyError = '❌ Invalid or unapproved License Key. Dummy or test keys are blocked. Please message Surya (+91 7010199142) on WhatsApp to verify your ₹299 payment.';
+        this.keyError = result.message;
       }
-    }, 500);
-  }
-
-  // Validates if key is cryptographically signed for this user's phone/email
-  private isKeyApprovedForUser(key: string): boolean {
-    if (!key || key.length < 12) return false;
-    if (key.startsWith('SURYA-PRO-')) {
-      const parts = key.split('-');
-      if (parts.length >= 3 && (parts[2] === '2026' || parts[2] === 'SBI' || parts[2] === '9942')) {
-        return true;
-      }
+    } catch (err: any) {
+      this.keySubmitting = false;
+      this.keyError = '❌ License verification error. Please check your internet connection or contact Admin Surya.';
     }
-    return false;
   }
 
   // ADMIN APPROVAL ACTION (For Owner / Surya)
@@ -241,11 +236,29 @@ export class ProModalComponent implements OnInit {
     this.adminError = null;
     const pass = this.adminPasscode.trim();
 
-    if (pass === '7010' || pass === 'surya7010' || pass === 'admin9942') {
+    if (pass === 'Surya@2000' || pass === 'techiesurya') {
+      const adminKey = `PDFPRO-SURYA-${Date.now().toString().slice(-6)}`;
+      
+      const adminLicense: ProLicenseRecord = {
+        licenseKey: adminKey,
+        userName: this.userName || 'Admin Surya',
+        userEmail: this.userEmail || 'surya@admin.com',
+        userPhone: this.userPhone || '917010199142',
+        plan: 'pro_lifetime',
+        amount: 299,
+        status: 'active',
+        createdAt: Date.now(),
+        activatedCount: 1,
+        maxActivations: 10,
+        notes: 'Owner bypass via Admin PIN'
+      };
+
+      // Register official license in database
+      this.licenseService.saveLicense(adminLicense).subscribe();
+
       if (this.isBrowser) {
         this.cookieStorage.setItem(this.PRO_ACTIVE_KEY, 'true', 365);
-        this.cookieStorage.setItem(this.PRO_LICENSE_KEY, `ADMIN-APPROVED-7010-${Date.now()}`, 365);
-        this.cookieStorage.removeItem(this.PENDING_REQ_KEY);
+        this.cookieStorage.setItem(this.PRO_LICENSE_KEY, adminKey, 365);
       }
       this.currentStep = 'activated';
     } else {

@@ -500,13 +500,34 @@
         padding-top: 1rem;
         border-top: 1px solid var(--color-border);
 
-        .link-btn {
-          font-size: 0.75rem;
-          color: var(--color-text-muted);
-          cursor: pointer;
+        .admin-links-row {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 1rem;
+          flex-wrap: wrap;
 
-          &:hover {
+          .link-btn {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            background: none;
+            border: none;
+
+            &:hover {
+              color: var(--color-primary);
+            }
+          }
+
+          .admin-dashboard-link {
+            font-size: 0.75rem;
             color: var(--color-primary);
+            font-weight: 600;
+            text-decoration: none;
+
+            &:hover {
+              text-decoration: underline;
+            }
           }
         }
 
@@ -571,3 +592,97 @@
     }
   }
 }
+
+// Plan Selection Tier Styling
+.plans-selector-container {
+  margin-bottom: 1.5rem;
+
+  .font-bold {
+    font-weight: 700;
+  }
+
+  .plans-cards-select-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+
+    .plan-select-card {
+      background: var(--color-surface, #ffffff);
+      border: 2px solid var(--color-border, #e2e8f0);
+      border-radius: 12px;
+      padding: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+
+      &:hover {
+        border-color: #8b5cf6;
+        background: rgba(139, 92, 246, 0.02);
+      }
+
+      &.selected {
+        border-color: #8b5cf6;
+        background: rgba(139, 92, 246, 0.08);
+        box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+
+        .plan-card-mini-name {
+          color: #7c3aed;
+        }
+      }
+
+      .plan-card-mini-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .plan-card-mini-name {
+          font-weight: 800;
+          font-size: 0.88rem;
+          color: var(--color-text, #0f172a);
+        }
+
+        .plan-mini-badge {
+          font-size: 0.68rem;
+          font-weight: 800;
+          padding: 0.15rem 0.45rem;
+          border-radius: 999px;
+          background: #8b5cf6;
+          color: #ffffff;
+        }
+      }
+
+      .plan-card-mini-price {
+        display: flex;
+        align-items: baseline;
+        gap: 0.2rem;
+
+        .currency-sym {
+          font-weight: 800;
+          font-size: 0.95rem;
+          color: #059669;
+        }
+
+        .price-val {
+          font-weight: 900;
+          font-size: 1.35rem;
+          color: #059669;
+        }
+
+        .interval-sub {
+          font-size: 0.72rem;
+          color: var(--color-text-muted, #64748b);
+          font-weight: 600;
+        }
+      }
+
+      .plan-card-mini-devices {
+        font-size: 0.75rem;
+        color: var(--color-text-secondary, #475569);
+      }
+    }
+  }
+}
+

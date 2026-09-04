@@ -5,8 +5,21 @@
   background: var(--color-bg);
   color: var(--color-text);
   transition: background-color 0.2s ease, color 0.2s ease;
+
+  &.admin-route-shell {
+    height: 100vh;
+    min-height: 100vh;
+    overflow: hidden;
+  }
 }
 
 .main-content {
   flex: 1;
+
+  &.admin-main-full {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
 }

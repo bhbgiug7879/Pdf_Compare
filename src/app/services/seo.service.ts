@@ -20,7 +20,19 @@ export class SeoService {
     this.isBrowser = isPlatformBrowser(platformId);
   }
 
+  public setAdminPageSeo(): void {
+    this.titleService.setTitle('Admin Console | PDF Master Suite');
+    this.metaService.updateTag({ name: 'robots', content: 'noindex, nofollow' });
+    this.metaService.updateTag({ name: 'title', content: 'Admin Console' });
+    this.metaService.updateTag({ name: 'description', content: 'Internal PDF Master administration portal.' });
+  }
+
+  public resetRobotsToDefault(): void {
+    this.metaService.updateTag({ name: 'robots', content: 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1' });
+  }
+
   public setToolPageSeo(tool: ToolDefinition): void {
+    this.resetRobotsToDefault();
     const fullTitle = `${tool.seoTitle} | ${this.defaultSiteName}`;
     const pageUrl = `${this.siteUrl}/${tool.slug}`;
 
@@ -52,6 +64,7 @@ export class SeoService {
   }
 
   public setCategoryPageSeo(category: CategoryInfo): void {
+    this.resetRobotsToDefault();
     const fullTitle = `${category.name} Online Free – Best PDF ${category.name} Tools | ${this.defaultSiteName}`;
     const pageUrl = `${this.siteUrl}/category/${category.slug}`;
     const desc = `Explore free online ${category.name} tools. ${category.description} Fast, secure, browser-based WASM processing.`;
@@ -68,6 +81,7 @@ export class SeoService {
   }
 
   public setHomePageSeo(): void {
+    this.resetRobotsToDefault();
     const fullTitle = 'Free PDF Tools & AI PDF Compare – 30+ Online PDF Utilities';
     const pageUrl = `${this.siteUrl}/`;
     const desc = 'Free online PDF tools: Merge, Split, Compress, Convert, Edit, Sign, Protect, OCR, and AI-powered Compare PDF. 100% private, instant client-side WASM processing.';
@@ -81,6 +95,35 @@ export class SeoService {
     this.updateCanonicalLink(pageUrl);
 
     this.injectHomeStructuredData();
+  }
+
+  public setComparePageSeo(): void {
+    this.resetRobotsToDefault();
+    const fullTitle = `Compare PDF Files Online Free | AI PDF Diff Tool – Visual Differences`;
+    const pageUrl = `${this.siteUrl}/compare-pdf`;
+    const desc = `Compare two or more PDF files online for free. Instantly detect additions, deletions, and changed values with synchronized side-by-side visual redlines. 100% private in-browser diff engine.`;
+    const keywords = [
+      'compare pdf', 'compare two pdf files', 'pdf diff checker', 'compare pdf documents online',
+      'pdf comparison tool free', 'visual pdf diff', 'contract compare', 'invoice compare', 'redline pdf'
+    ];
+
+    this.titleService.setTitle(fullTitle);
+    this.metaService.updateTag({ name: 'title', content: fullTitle });
+    this.metaService.updateTag({ name: 'description', content: desc });
+    this.metaService.updateTag({ name: 'keywords', content: keywords.join(', ') });
+
+    this.metaService.updateTag({ property: 'og:title', content: fullTitle });
+    this.metaService.updateTag({ property: 'og:description', content: desc });
+    this.metaService.updateTag({ property: 'og:url', content: pageUrl });
+    this.metaService.updateTag({ property: 'og:type', content: 'website' });
+    this.metaService.updateTag({ property: 'og:site_name', content: this.defaultSiteName });
+
+    this.metaService.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
+    this.metaService.updateTag({ name: 'twitter:title', content: fullTitle });
+    this.metaService.updateTag({ name: 'twitter:description', content: desc });
+    this.metaService.updateTag({ name: 'twitter:url', content: pageUrl });
+
+    this.updateCanonicalLink(pageUrl);
   }
 
   private updateCanonicalLink(url: string): void {

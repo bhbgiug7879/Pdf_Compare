@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -17,6 +18,7 @@ import { SecurityModalComponent } from './components/modals/security-modal/secur
 import { ProModalComponent } from './components/modals/pro-modal/pro-modal.component';
 import { HistoryModalComponent } from './components/modals/history-modal/history-modal.component';
 import { ContactModalComponent } from './components/modals/contact-modal/contact-modal.component';
+import { AdminComponent } from './components/admin/admin.component';
 
 @NgModule({
   declarations: [
@@ -32,12 +34,14 @@ import { ContactModalComponent } from './components/modals/contact-modal/contact
     SecurityModalComponent,
     ProModalComponent,
     HistoryModalComponent,
-    ContactModalComponent
+    ContactModalComponent,
+    AdminComponent
   ],
   imports: [
     BrowserModule,
     CommonModule,
     FormsModule,
+    HttpClientModule,
     AppRoutingModule
   ],
   providers: [],

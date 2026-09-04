@@ -1,4 +1,41 @@
+# ==========================================
+# Robots.txt for PDF Master & Compare AI
+# Website: https://pdf-compare-emqg.vercel.app/
+# ==========================================
+
 User-agent: *
 Allow: /
+Allow: /compare-pdf
+Allow: /category/
+Allow: /merge-pdf
+Allow: /split-pdf
+Allow: /compress-pdf
+Allow: /pdf-to-word
+Allow: /word-to-pdf
+Allow: /pdf-to-jpg
+Allow: /jpg-to-pdf
+Allow: /sign-pdf
+Allow: /protect-pdf
+Allow: /unlock-pdf
+Allow: /ocr-pdf
 
+# Disallow Private Administrative Console
+Disallow: /admin
+Disallow: /admin/
+Disallow: /*?*token=
+Disallow: /*?*key=
+
+# Googlebot specific optimizations
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+# Bingbot specific optimizations
+User-agent: Bingbot
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+# Canonical XML Sitemap
 Sitemap: https://pdf-compare-emqg.vercel.app/sitemap.xml

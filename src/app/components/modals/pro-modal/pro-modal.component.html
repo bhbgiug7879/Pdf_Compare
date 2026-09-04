@@ -51,6 +51,32 @@
           <div class="benefit-tag">⚡ Pure WASM Speed</div>
         </div>
 
+        <!-- Plan Selection Tier Options -->
+        <div class="plans-selector-container" *ngIf="availablePlans.length > 0">
+          <label class="form-label font-bold">Choose Your Pro Plan:</label>
+          <div class="plans-cards-select-row">
+            <div 
+              *ngFor="let plan of availablePlans" 
+              class="plan-select-card" 
+              [class.selected]="selectedPlanId === plan.id"
+              (click)="selectPlan(plan)"
+            >
+              <div class="plan-card-mini-top">
+                <span class="plan-card-mini-name">{{ plan.name }}</span>
+                <span *ngIf="plan.badge" class="plan-mini-badge">{{ plan.badge }}</span>
+              </div>
+              <div class="plan-card-mini-price">
+                <span class="currency-sym">₹</span>
+                <span class="price-val">{{ plan.amount }}</span>
+                <span class="interval-sub">/ {{ plan.billingInterval === 'lifetime' ? 'one-time' : plan.billingInterval }}</span>
+              </div>
+              <div class="plan-card-mini-devices">
+                🖥️ {{ plan.maxActivations }} Devices Max
+              </div>
+            </div>
+          </div>
+        </div>
+
         <h4 class="step-heading">Step 1: Enter User Details for Pro License</h4>
         <p class="step-subheading">Your official Pro activation key will be linked to your name and phone number.</p>
 
@@ -194,7 +220,7 @@
           <div class="input-group">
             <input 
               type="text" 
-              placeholder="Paste Approved License Key (e.g. SURYA-MASTER-7010)" 
+              placeholder="Paste Approved License Key (e.g. PDFPRO-A892-4211-9921)" 
               [(ngModel)]="enteredKey" 
               class="form-input"
             />
@@ -208,13 +234,18 @@
 
         <!-- Admin Quick Unlock Portal -->
         <div class="admin-portal-link">
-          <button class="link-btn" (click)="showAdminLogin = !showAdminLogin">
-            ⚙️ Admin / Owner Login (Surya)
-          </button>
+          <div class="admin-links-row">
+            <button class="link-btn" (click)="showAdminLogin = !showAdminLogin">
+              ⚙️ Admin PIN Login (Surya)
+            </button>
+            <a routerLink="/admin" (click)="close.emit()" class="admin-dashboard-link">
+              Open Admin Approval Dashboard →
+            </a>
+          </div>
           <div *ngIf="showAdminLogin" class="admin-pass-box animate-fade-in">
             <input 
               type="password" 
-              placeholder="Enter Admin PIN (7010)" 
+              placeholder="Enter Admin Password (Surya@2000)" 
               [(ngModel)]="adminPasscode" 
               class="form-input admin-input" 
             />
@@ -229,13 +260,13 @@
            ========================================== -->
       <div *ngIf="currentStep === 'enter_key'" class="step-content animate-fade-in">
         <h4 class="step-heading">Enter Approved Pro License Key</h4>
-        <p class="step-subheading">Enter the official license key issued by Admin Surya after ₹{{ proPriceInr }} verification.</p>
+        <p class="step-subheading">Keys are strictly validated online against the Firebase Paid Users Database.</p>
 
         <div class="form-group">
           <label class="form-label">License Key</label>
           <input 
             type="text" 
-            placeholder="e.g. SURYA-MASTER-7010" 
+            placeholder="e.g. PDFPRO-A892-4211-9921" 
             [(ngModel)]="enteredKey" 
             class="form-input key-field"
           />

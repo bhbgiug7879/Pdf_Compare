@@ -4,11 +4,13 @@ import { HomeComponent } from './components/home/home.component';
 import { CategoryComponent } from './components/category/category.component';
 import { ToolPageComponent } from './components/shared/tool-page/tool-page.component';
 import { CompareToolComponent } from './components/compare-tool/compare-tool.component';
+import { AdminComponent } from './components/admin/admin.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' },
   { path: 'category/:id', component: CategoryComponent },
   { path: 'compare-pdf', component: CompareToolComponent },
+  { path: 'admin', component: AdminComponent },
 
   // 1. Organize PDF Tools
   { path: 'merge-pdf', component: ToolPageComponent, data: { toolSlug: 'merge-pdf' } },

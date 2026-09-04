@@ -74,6 +74,8 @@ export class CompareToolComponent implements OnInit {
     const tool = this.toolRegistry.getToolBySlug('compare-pdf');
     if (tool) {
       this.seoService.setToolPageSeo(tool);
+    } else {
+      this.seoService.setComparePageSeo();
     }
 
     this.presets = this.pdfCompareService.SAMPLE_PRESETS;

@@ -1,0 +1,1635 @@
+<div class="admin-container">
+  <!-- Toast Notification -->
+  <div *ngIf="toastMessage" class="toast-notification" [ngClass]="'toast-' + toastType">
+    {{ toastMessage }}
+  </div>
+
+  <!-- AUTHENTICATION GATE: techiesurya / Surya@2000 -->
+  <div *ngIf="!isAuthenticated" class="auth-wrapper animate-fade-in">
+    <div class="auth-card">
+      <div class="auth-icon-badge">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h2>Admin Console</h2>
+      <p class="auth-sub">Authorized system access for Surya (techiesurya).</p>
+
+      <div class="form-group text-left">
+        <label class="form-label">Admin Username</label>
+        <input 
+          type="text" 
+          [(ngModel)]="adminUsername" 
+          placeholder="Enter username" 
+          class="form-input"
+          autofocus
+        />
+      </div>
+
+      <div class="form-group text-left">
+        <label class="form-label">Password</label>
+        <input 
+          type="password" 
+          [(ngModel)]="adminPassword" 
+          placeholder="Enter password" 
+          (keyup.enter)="verifyCredentials()"
+          class="form-input"
+        />
+      </div>
+
+      <div *ngIf="loginError" class="error-banner animate-fade-in">{{ loginError }}</div>
+
+      <button class="btn btn-primary btn-full btn-lg mt-3" (click)="verifyCredentials()">
+        Sign In to Admin Console
+      </button>
+
+      <div class="auth-footnote">
+        PDF Master Enterprise License & Subscription Manager
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN ADMIN DASHBOARD WITH LEFT SIDEBAR & RIGHT DATA VIEWS -->
+  <div *ngIf="isAuthenticated" class="admin-layout-shell animate-fade-in">
+    <!-- Backdrop for mobile drawer -->
+    <div class="sidebar-backdrop" *ngIf="sidebarOpen" (click)="closeSidebar()"></div>
+
+    <!-- ==========================================
+         LEFT SIDEBAR NAVIGATION
+         ========================================== -->
+    <aside class="admin-sidebar" [class.sidebar-open]="sidebarOpen">
+      <!-- Brand & Title -->
+      <div class="sidebar-brand">
+        <div class="brand-badge-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div class="brand-text-block">
+          <span class="brand-title">PDF Master</span>
+          <span class="brand-sub">Admin Console</span>
+        </div>
+        <button class="mobile-close-btn" (click)="closeSidebar()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Admin Identity Card -->
+      <div class="admin-user-card">
+        <div class="user-avatar-wrap">
+          <span class="user-avatar-initial">S</span>
+          <span class="online-indicator-dot" title="Admin Active"></span>
+        </div>
+        <div class="user-details-wrap">
+          <div class="admin-name-row">
+            <span class="admin-name">Surya</span>
+            <span class="admin-role-badge">Super Admin</span>
+          </div>
+          <span class="admin-handle">&#64;techiesurya</span>
+          <div class="db-live-pill">
+            <span class="pulse-dot"></span>
+            <span>Realtime DB Connected</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Menu Groups -->
+      <nav class="sidebar-nav">
+        <div class="nav-group-title">DASHBOARD & MANAGEMENT</div>
+        <button class="nav-item" [class.active]="activeTab === 'overview'" (click)="selectTab('overview')">
+          <span class="nav-icon-svg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          </span>
+          <span class="nav-label">Overview</span>
+        </button>
+
+        <button class="nav-item" [class.active]="activeTab === 'paid_users'" (click)="selectTab('paid_users')">
+          <span class="nav-icon-svg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
+          <span class="nav-label">Paid Users</span>
+          <span class="nav-counter danger" *ngIf="blockedCount > 0">{{ blockedCount }} Blocked</span>
+          <span class="nav-counter" *ngIf="blockedCount === 0">{{ licenses.length }}</span>
+        </button>
+
+        <button class="nav-item" [class.active]="activeTab === 'plans'" (click)="selectTab('plans')">
+          <span class="nav-icon-svg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg>
+          </span>
+          <span class="nav-label">Pricing Plans</span>
+          <span class="nav-counter info">{{ plans.length }}</span>
+        </button>
+
+        <div class="nav-group-title">LICENSING & PAYMENTS</div>
+        <button class="nav-item" [class.active]="activeTab === 'requests'" (click)="selectTab('requests')">
+          <span class="nav-icon-svg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          </span>
+          <span class="nav-label">Payment Requests</span>
+          <span *ngIf="pendingCount > 0" class="nav-counter warning">{{ pendingCount }}</span>
+        </button>
+
+        <button class="nav-item" [class.active]="activeTab === 'licenses'" (click)="selectTab('licenses')">
+          <span class="nav-icon-svg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M11 12l8.5-8.5a1.5 1.5 0 0 1 2.12 0l.88.88a1.5 1.5 0 0 1 0 2.12L19 10l-2-2-3 3"/></svg>
+          </span>
+          <span class="nav-label">License Keys</span>
+          <span class="nav-counter mute">{{ licenses.length }}</span>
+        </button>
+
+        <button class="nav-item" [class.active]="activeTab === 'generate'" (click)="selectTab('generate')">
+          <span class="nav-icon-svg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          </span>
+          <span class="nav-label">Issue License</span>
+        </button>
+
+        <div class="nav-group-title">SYSTEM & DATABASE</div>
+        <button class="nav-item" [class.active]="activeTab === 'firebase_json'" (click)="selectTab('firebase_json')">
+          <span class="nav-icon-svg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          </span>
+          <span class="nav-label">Database Tree</span>
+        </button>
+
+        <button class="nav-item" [class.active]="activeTab === 'settings'" (click)="selectTab('settings')">
+          <span class="nav-icon-svg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </span>
+          <span class="nav-label">Settings</span>
+        </button>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <div class="quick-revenue-chip">
+          <span class="chip-label">Total Revenue</span>
+          <strong class="chip-val">₹{{ paidUsersRevenueInr }}</strong>
+        </div>
+        <button class="btn-logout" (click)="logout()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ==========================================
+         RIGHT SIDE: MAIN DATA VIEWS STAGE
+         ========================================== -->
+    <main class="admin-main-stage">
+      <!-- Sticky Topbar -->
+      <header class="stage-topbar">
+        <div class="topbar-left">
+          <button class="hamburger-btn" (click)="toggleSidebar()" title="Toggle Navigation">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div class="breadcrumb-trail">
+            <span class="crumb-root">Admin Console</span>
+            <span class="crumb-sep">/</span>
+            <span class="crumb-current">{{ getActiveTabTitle() }}</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button class="btn btn-outline btn-xs btn-with-icon" (click)="loadAllData()" title="Re-sync data from Firebase">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            <span>Sync Data</span>
+          </button>
+          <a href="/" target="_blank" class="btn btn-ghost btn-xs btn-with-icon" title="Open App in new tab">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            <span>View App</span>
+          </a>
+          <div class="db-chip" [title]="databaseUrl">
+            <span class="chip-dot"></span>
+            <span>Realtime DB</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content Stage Body -->
+      <div class="stage-body">
+        <!-- Top Metrics KPI Cards Strip -->
+        <div class="metrics-grid">
+          <div class="metric-card gold" (click)="selectTab('paid_users')">
+            <div class="metric-icon-box gold">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </div>
+            <div class="metric-info">
+              <span class="metric-val">₹{{ paidUsersRevenueInr }}</span>
+              <span class="metric-label">Paid Revenue</span>
+            </div>
+          </div>
+
+          <div class="metric-card emerald" (click)="selectTab('paid_users'); paidUsersFilter = 'active'">
+            <div class="metric-icon-box emerald">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+            </div>
+            <div class="metric-info">
+              <span class="metric-val">{{ activeLicensesCount }}</span>
+              <span class="metric-label">Active Subscribers</span>
+            </div>
+          </div>
+
+          <div class="metric-card red" (click)="selectTab('paid_users'); paidUsersFilter = 'blocked'" *ngIf="blockedCount > 0">
+            <div class="metric-icon-box red">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+            </div>
+            <div class="metric-info">
+              <span class="metric-val">{{ blockedCount }}</span>
+              <span class="metric-label">Blocked Accounts</span>
+            </div>
+          </div>
+
+          <div class="metric-card purple" (click)="selectTab('plans')">
+            <div class="metric-icon-box purple">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg>
+            </div>
+            <div class="metric-info">
+              <span class="metric-val">{{ plans.length }}</span>
+              <span class="metric-label">Pricing Plans</span>
+            </div>
+          </div>
+
+          <div class="metric-card amber" (click)="selectTab('requests'); requestFilter = 'pending'">
+            <div class="metric-icon-box amber">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="metric-info">
+              <span class="metric-val">{{ pendingCount }}</span>
+              <span class="metric-label">Pending UTR Approvals</span>
+            </div>
+          </div>
+        </div>
+
+    <!-- TAB 1: OVERVIEW -->
+    <div *ngIf="activeTab === 'overview'" class="tab-content animate-fade-in">
+      <div class="overview-grid">
+        <div class="quick-action-box">
+          <div class="box-header">
+            <h3>Pending Payment Approvals</h3>
+            <span class="badge" *ngIf="pendingCount > 0">{{ pendingCount }} awaiting UTR verification</span>
+          </div>
+
+          <div *ngIf="pendingCount === 0" class="empty-state">
+            <div class="empty-icon">✓</div>
+            <p>All caught up! No pending payment requests awaiting approval.</p>
+          </div>
+
+          <div *ngIf="pendingCount > 0" class="mini-request-list">
+            <div *ngFor="let req of filteredRequests | slice:0:5" class="mini-req-card" [hidden]="req.status !== 'pending_admin_approval'">
+              <div class="mini-req-top">
+                <strong>{{ req.userName }}</strong>
+                <span class="amount-tag">₹{{ req.amount }}</span>
+              </div>
+              <div class="mini-req-meta">
+                <span>📱 {{ req.userPhone }}</span>
+                <span>🏦 UTR: <code>{{ req.utrNumber }}</code></span>
+              </div>
+              <div class="mini-req-actions">
+                <button class="btn btn-primary btn-sm" (click)="openVerifyModal(req)">
+                  🔍 Verify UTR & Issue Key
+                </button>
+                <button class="btn btn-danger btn-sm" (click)="rejectPayment(req)">
+                  ✕ Reject
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="system-status-box">
+          <div class="box-header">
+            <h3>Admin Security & Database Status</h3>
+          </div>
+
+          <ul class="status-list">
+            <li>
+              <span class="dot active"></span>
+              <strong>Admin Account:</strong>
+              <span>techiesurya (Verified)</span>
+            </li>
+            <li>
+              <span class="dot active"></span>
+              <strong>Strict DB Verification:</strong>
+              <span>Enabled (Only active keys in Firebase allowed)</span>
+            </li>
+            <li>
+              <span class="dot active"></span>
+              <strong>Active Database:</strong>
+              <code class="url-snippet">{{ databaseUrl }}</code>
+            </li>
+            <li>
+              <span class="dot active"></span>
+              <strong>Owner Contact:</strong>
+              <span>+91 7010199142 (Surya)</span>
+            </li>
+          </ul>
+
+          <div class="box-footer-actions">
+            <button class="btn btn-outline btn-full" (click)="activeTab = 'firebase_json'">
+              View Live Firebase Database JSON Tree →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         TAB: PAID USERS DIRECTORY & ACCESS CONTROL
+         ========================================== -->
+    <div *ngIf="activeTab === 'paid_users'" class="tab-content animate-fade-in">
+      <div class="screen-header">
+        <div class="screen-title-wrap">
+          <div class="screen-badge">Subscribers Directory</div>
+          <h2>Paid Users & Access Control</h2>
+          <p class="sub-text">
+            Monitor active subscriptions, update customer billing plans, and manage account access permissions.
+          </p>
+        </div>
+        <div class="screen-header-actions">
+          <button class="btn btn-primary btn-sm btn-with-icon" (click)="activeTab = 'generate'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <span>Issue License</span>
+          </button>
+          <button class="btn btn-outline btn-sm btn-with-icon" (click)="loadAllData()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            <span>Sync Data</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Breakdown Summary Row -->
+      <div class="subscriber-stats-strip">
+        <div class="sub-stat-card">
+          <span class="sub-stat-label">Active Users</span>
+          <span class="sub-stat-num text-success">{{ activeLicensesCount }}</span>
+        </div>
+        <div class="sub-stat-card">
+          <span class="sub-stat-label">Monthly Plan</span>
+          <span class="sub-stat-num">{{ monthlyUsersCount }}</span>
+        </div>
+        <div class="sub-stat-card">
+          <span class="sub-stat-label">Yearly Plan</span>
+          <span class="sub-stat-num">{{ yearlyUsersCount }}</span>
+        </div>
+        <div class="sub-stat-card">
+          <span class="sub-stat-label">Lifetime Pro</span>
+          <span class="sub-stat-num">{{ lifetimeUsersCount }}</span>
+        </div>
+        <div class="sub-stat-card danger-card" *ngIf="blockedCount > 0">
+          <span class="sub-stat-label text-danger">Blocked</span>
+          <span class="sub-stat-num text-danger">{{ blockedCount }}</span>
+        </div>
+      </div>
+
+      <!-- Controls & Filter Bar -->
+      <div class="controls-bar-modern">
+        <div class="search-wrap-modern">
+          <svg class="search-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input 
+            type="text" 
+            [(ngModel)]="paidUsersSearch" 
+            placeholder="Search by customer name, phone, email, UTR, or license key..." 
+            class="search-input-modern"
+          />
+          <button *ngIf="paidUsersSearch" class="clear-search-btn" (click)="paidUsersSearch = ''">✕</button>
+        </div>
+
+        <div class="filter-controls-right">
+          <div class="select-wrap-modern">
+            <select [(ngModel)]="paidUsersPlanFilter" class="select-modern">
+              <option value="all">All Plans & Intervals</option>
+              <option value="monthly">Monthly Plans</option>
+              <option value="yearly">Yearly Plans</option>
+              <option value="lifetime">Lifetime Plans</option>
+              <option *ngFor="let p of plans" [value]="p.id">{{ p.name }} (₹{{ p.amount }})</option>
+            </select>
+          </div>
+
+          <div class="filter-pills-modern">
+            <button class="pill-modern" [class.active]="paidUsersFilter === 'all'" (click)="paidUsersFilter = 'all'">
+              All ({{ licenses.length }})
+            </button>
+            <button class="pill-modern" [class.active]="paidUsersFilter === 'active'" (click)="paidUsersFilter = 'active'">
+              Active ({{ activeLicensesCount }})
+            </button>
+            <button class="pill-modern danger" [class.active]="paidUsersFilter === 'blocked'" (click)="paidUsersFilter = 'blocked'">
+              Blocked ({{ blockedCount }})
+            </button>
+            <button class="pill-modern warning" [class.active]="paidUsersFilter === 'expired'" (click)="paidUsersFilter = 'expired'">
+              Expired
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paid Users Table -->
+      <div class="table-card-wrapper">
+        <div class="table-responsive">
+          <table class="data-table-modern">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Plan & Frequency</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>License Key</th>
+                <th>Validity / Expiry</th>
+                <th>Devices</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="paidUsersList.length === 0">
+                <td colspan="8" class="text-center py-6">
+                  <div class="empty-state-clean">
+                    <div class="empty-icon-box">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                    </div>
+                    <h4>No Paid Users Found</h4>
+                    <p>No customer records match your current filter or search criteria.</p>
+                  </div>
+                </td>
+              </tr>
+
+              <tr *ngFor="let user of paidUsersList" [class.row-blocked]="user.status === 'blocked'">
+                <td>
+                  <div class="user-meta-cell">
+                    <div class="user-name-line">
+                      <span class="customer-name">{{ user.userName || 'Customer' }}</span>
+                      <span *ngIf="user.userCompany" class="company-tag">{{ user.userCompany }}</span>
+                    </div>
+                    <span class="customer-contact" *ngIf="user.userEmail">{{ user.userEmail }}</span>
+                    <span class="customer-contact" *ngIf="user.userPhone">{{ user.userPhone }}</span>
+                    <span *ngIf="user.utrNumber && user.utrNumber !== 'N/A'" class="customer-utr">
+                      UTR: <code>{{ user.utrNumber }}</code>
+                    </span>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="plan-badge-cell">
+                    <span class="plan-pill-name">
+                      {{ user.planName || getPlanName(user.plan) }}
+                    </span>
+                    <span class="plan-frequency-pill" [ngClass]="'freq-' + (user.billingInterval || 'lifetime')">
+                      {{ formatInterval(user.billingInterval) }}
+                    </span>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="price-badge">₹{{ user.amount || 299 }}</span>
+                </td>
+
+                <td>
+                  <div class="status-cell">
+                    <span class="status-badge" [ngClass]="user.status">
+                      <span class="badge-dot"></span>
+                      <span>{{ user.status === 'active' ? 'Active' : (user.status === 'blocked' ? 'Blocked' : (user.status === 'expired' ? 'Expired' : 'Revoked')) }}</span>
+                    </span>
+                    <span *ngIf="user.status === 'blocked' && user.blockReason" class="block-reason-text" [title]="user.blockReason">
+                      {{ user.blockReason }}
+                    </span>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="key-cell-modern">
+                    <code class="license-code">{{ user.licenseKey }}</code>
+                    <button class="btn-icon-copy" (click)="copyToClipboard(user.licenseKey)" title="Copy License Key">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="validity-cell-modern">
+                    <span class="validity-label" [ngClass]="{'text-danger': getExpiryBadge(user).isExpired, 'text-warning': getExpiryBadge(user).isWarning}">
+                      {{ getExpiryBadge(user).text }}
+                    </span>
+                    <span class="validity-sub">Created: {{ user.createdAt | date:'mediumDate' }}</span>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="device-count-pill" [title]="(user.activatedDevices || []).join(', ')">
+                    {{ user.activatedCount || 0 }}/{{ user.maxActivations || 2 }} devices
+                  </span>
+                </td>
+
+                <td>
+                  <div class="action-buttons-cell">
+                    <!-- Block / Unblock Button -->
+                    <button 
+                      *ngIf="user.status !== 'blocked'" 
+                      class="btn-table-action btn-action-danger" 
+                      (click)="openBlockModal(user)"
+                      title="Block user access"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                      <span>Block</span>
+                    </button>
+                    <button 
+                      *ngIf="user.status === 'blocked'" 
+                      class="btn-table-action btn-action-success" 
+                      (click)="unblockUser(user)"
+                      title="Restore Pro access"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span>Unblock</span>
+                    </button>
+
+                    <!-- Change Plan Button -->
+                    <button 
+                      class="btn-table-action btn-action-primary" 
+                      (click)="openChangePlanModal(user)"
+                      title="Change user plan or interval"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                      <span>Plan</span>
+                    </button>
+
+                    <!-- View Details Button -->
+                    <button 
+                      class="btn-table-action btn-action-outline" 
+                      (click)="openUserDetailModal(user)"
+                      title="View full user details"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                      <span>Details</span>
+                    </button>
+
+                    <!-- Delete Button -->
+                    <button 
+                      class="btn-icon-danger" 
+                      (click)="deleteLicenseRecord(user)"
+                      title="Delete record"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         TAB: PLANS & PRICING MANAGEMENT
+         ========================================== -->
+    <div *ngIf="activeTab === 'plans'" class="tab-content animate-fade-in">
+      <div class="screen-header">
+        <div class="screen-title-wrap">
+          <div class="screen-badge">Subscriptions</div>
+          <h2>Pricing & Subscription Plans</h2>
+          <p class="sub-text">
+            Configure subscription tiers, price amounts (₹ INR), billing frequencies (Monthly, Yearly, Lifetime), and device quotas.
+          </p>
+        </div>
+        <div class="screen-header-actions">
+          <button class="btn btn-outline btn-sm btn-with-icon" (click)="resetPlanForm()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>New Plan Form</span>
+          </button>
+          <button class="btn btn-outline btn-sm btn-with-icon" (click)="fetchPlans()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            <span>Refresh Plans</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="plans-management-grid">
+        <!-- LEFT: CREATE / EDIT PLAN FORM -->
+        <div class="form-container-card plan-editor-card">
+          <div class="editor-header">
+            <h3>{{ isEditingPlan ? 'Edit Plan: ' + planForm.name : 'Create Subscription Plan' }}</h3>
+            <span class="badge" *ngIf="isEditingPlan">Editing</span>
+          </div>
+          <p class="form-desc">
+            Define pricing, interval terms, and feature list for new customer licenses.
+          </p>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Plan Display Name <span class="required">*</span></label>
+              <input 
+                type="text" 
+                [(ngModel)]="planForm.name" 
+                placeholder="e.g. Pro Monthly, Pro Annual, Enterprise VIP" 
+                class="form-input"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Billing Interval / Frequency <span class="required">*</span></label>
+              <select [(ngModel)]="planForm.billingInterval" class="form-input">
+                <option value="monthly">Monthly (30 Days)</option>
+                <option value="yearly">Yearly (365 Days)</option>
+                <option value="lifetime">Lifetime (One-time, No Expiry)</option>
+                <option value="quarterly">Quarterly (90 Days)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Price (₹ INR) <span class="required">*</span></label>
+              <div class="price-input-wrap">
+                <span class="currency-prefix">₹</span>
+                <input 
+                  type="number" 
+                  [(ngModel)]="planForm.amount" 
+                  placeholder="e.g. 99, 299, 799" 
+                  class="form-input with-prefix"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Max Allowed Devices <span class="required">*</span></label>
+              <input 
+                type="number" 
+                [(ngModel)]="planForm.maxActivations" 
+                min="1" 
+                max="50" 
+                class="form-input"
+              />
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Plan Identifier (Slug)</label>
+              <input 
+                type="text" 
+                [(ngModel)]="planForm.id" 
+                placeholder="e.g. pro_monthly (auto-generated if empty)" 
+                class="form-input"
+                [disabled]="isEditingPlan"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Marketing Badge (Optional)</label>
+              <input 
+                type="text" 
+                [(ngModel)]="planForm.badge" 
+                placeholder="e.g. Popular, Best Value, 33% OFF" 
+                class="form-input"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Plan Description / Tagline</label>
+            <input 
+              type="text" 
+              [(ngModel)]="planForm.description" 
+              placeholder="e.g. Complete unlimited access for power users" 
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Included Features (One feature per line)</label>
+            <textarea 
+              [(ngModel)]="planFeaturesInput" 
+              rows="4" 
+              placeholder="Unlimited PDF Comparisons&#10;Side-by-Side Visual Diff&#10;Batch 50 Files&#10;Priority Email Support" 
+              class="form-input form-textarea"
+            ></textarea>
+          </div>
+
+          <div class="form-checkbox-row">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="planForm.isActive" />
+              <span>Plan is <strong>Active & Enabled</strong></span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="planForm.isPopular" />
+              <span>Highlight as <strong>Featured / Popular</strong></span>
+            </label>
+          </div>
+
+          <div *ngIf="planFormError" class="error-banner animate-fade-in">{{ planFormError }}</div>
+
+          <div class="form-actions">
+            <button 
+              class="btn btn-primary btn-lg" 
+              [disabled]="planSubmitting"
+              (click)="savePlanSubmit()"
+            >
+              <span *ngIf="!planSubmitting">{{ isEditingPlan ? 'Save Changes' : 'Create Plan' }}</span>
+              <span *ngIf="planSubmitting">Saving to Database...</span>
+            </button>
+            <button 
+              *ngIf="isEditingPlan" 
+              class="btn btn-outline" 
+              (click)="cancelEditPlan()"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT: PLANS SHOWCASE & STATS -->
+        <div class="plans-showcase-column">
+          <div class="section-title-row">
+            <h3>Active Configured Plans ({{ plans.length }})</h3>
+            <span class="sub-text">Synchronized with Firebase Realtime Database</span>
+          </div>
+
+          <div class="plan-cards-grid">
+            <div 
+              *ngFor="let plan of plans" 
+              class="plan-card" 
+              [class.featured-card]="plan.isPopular"
+              [class.inactive-card]="!plan.isActive"
+            >
+              <div class="plan-card-header">
+                <div class="plan-title-group">
+                  <h4>{{ plan.name }}</h4>
+                  <span class="interval-badge" [ngClass]="'badge-' + plan.billingInterval">
+                    {{ formatInterval(plan.billingInterval) }}
+                  </span>
+                </div>
+                <span *ngIf="plan.badge" class="plan-badge-pill">{{ plan.badge }}</span>
+              </div>
+
+              <div class="plan-price-block">
+                <span class="price-currency">₹</span>
+                <span class="price-number">{{ plan.amount }}</span>
+                <span class="price-term">/ {{ plan.billingInterval === 'lifetime' ? 'one-time' : plan.billingInterval }}</span>
+              </div>
+
+              <p class="plan-card-desc">{{ plan.description || 'Full PDF Master Pro feature suite.' }}</p>
+
+              <div class="plan-features-list">
+                <div class="feature-item" *ngFor="let feat of plan.features">
+                  <span class="feat-check">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  <span>{{ feat }}</span>
+                </div>
+                <div class="feature-item">
+                  <span class="feat-check">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  </span>
+                  <span>Up to {{ plan.maxActivations }} Device Activations</span>
+                </div>
+              </div>
+
+              <div class="plan-meta-stats">
+                <span>Subscribers: <strong>{{ getSubscriberCountForPlan(plan.id, plan.billingInterval) }}</strong></span>
+                <span class="status-indicator" [class.active-indicator]="plan.isActive">
+                  <span class="indicator-dot"></span>
+                  <span>{{ plan.isActive ? 'Active' : 'Inactive' }}</span>
+                </span>
+              </div>
+
+              <div class="plan-card-actions">
+                <button class="btn btn-primary btn-xs btn-with-icon" (click)="editPlan(plan)">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  <span>Edit</span>
+                </button>
+                <button 
+                  class="btn btn-outline btn-xs" 
+                  (click)="togglePlanStatus(plan)"
+                >
+                  {{ plan.isActive ? 'Deactivate' : 'Activate' }}
+                </button>
+                <button 
+                  class="btn btn-ghost btn-xs text-danger" 
+                  (click)="deletePlanSubmit(plan)"
+                  title="Delete Plan"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: PAYMENT REQUESTS -->
+    <div *ngIf="activeTab === 'requests'" class="tab-content animate-fade-in">
+      <div class="controls-bar">
+        <div class="filter-pills">
+          <button class="pill-btn" [class.active]="requestFilter === 'all'" (click)="requestFilter = 'all'">
+            All ({{ requests.length }})
+          </button>
+          <button class="pill-btn" [class.active]="requestFilter === 'pending'" (click)="requestFilter = 'pending'">
+            Pending ({{ pendingCount }})
+          </button>
+          <button class="pill-btn" [class.active]="requestFilter === 'approved'" (click)="requestFilter = 'approved'">
+            Approved ({{ approvedCount }})
+          </button>
+          <button class="pill-btn" [class.active]="requestFilter === 'rejected'" (click)="requestFilter = 'rejected'">
+            Rejected
+          </button>
+        </div>
+
+        <div class="search-wrap">
+          <input 
+            type="text" 
+            [(ngModel)]="searchQuery" 
+            placeholder="Search by Name, UTR, Phone, ID..." 
+            class="form-input search-input"
+          />
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Req ID</th>
+              <th>User Details</th>
+              <th>12-Digit Bank UTR</th>
+              <th>Amount</th>
+              <th>Submitted</th>
+              <th>Status</th>
+              <th>License Key</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="filteredRequests.length === 0">
+              <td colspan="8" class="text-center py-4">No matching payment requests found.</td>
+            </tr>
+            <tr *ngFor="let req of filteredRequests">
+              <td>
+                <span class="req-id">{{ req.requestId }}</span>
+              </td>
+              <td>
+                <div class="user-cell">
+                  <strong>{{ req.userName }}</strong>
+                  <span class="sub-contact">📞 {{ req.userPhone }}</span>
+                  <span class="sub-contact">✉️ {{ req.userEmail }}</span>
+                  <span *ngIf="req.userCompany" class="company-badge">{{ req.userCompany }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="utr-cell">
+                  <code class="utr-code">{{ req.utrNumber }}</code>
+                  <button class="copy-tiny" (click)="copyToClipboard(req.utrNumber)">📋</button>
+                </div>
+              </td>
+              <td>
+                <span class="amount-badge">₹{{ req.amount || 299 }}</span>
+              </td>
+              <td>
+                <span class="date-text">{{ req.submittedAt | date:'medium' }}</span>
+              </td>
+              <td>
+                <span class="status-pill" [ngClass]="req.status">
+                  <span *ngIf="req.status === 'pending_admin_approval'">⏳ Pending Approval</span>
+                  <span *ngIf="req.status === 'approved'">✓ Approved</span>
+                  <span *ngIf="req.status === 'rejected'">✕ Rejected</span>
+                </span>
+              </td>
+              <td>
+                <div *ngIf="req.generatedKey" class="key-cell">
+                  <code class="issued-key">{{ req.generatedKey }}</code>
+                  <button class="copy-tiny" (click)="copyToClipboard(req.generatedKey)">📋</button>
+                </div>
+                <span *ngIf="!req.generatedKey" class="text-muted">—</span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <ng-container *ngIf="req.status === 'pending_admin_approval'">
+                    <button class="btn btn-primary btn-xs" (click)="openVerifyModal(req)">
+                      🔍 Verify UTR & Issue Key
+                    </button>
+                    <button class="btn btn-outline-danger btn-xs" (click)="rejectPayment(req)">
+                      ✕ Reject
+                    </button>
+                  </ng-container>
+
+                  <ng-container *ngIf="req.status === 'approved' && req.generatedKey">
+                    <button class="btn btn-primary btn-xs" (click)="openVerifyModal(req)">
+                      🔑 View & Send Key
+                    </button>
+                    <a 
+                      [href]="getWhatsAppSendUrl(req.userPhone, req.userName, req.generatedKey)" 
+                      target="_blank" 
+                      class="btn btn-whatsapp btn-xs"
+                      title="Send on WhatsApp"
+                    >
+                      💬 WhatsApp
+                    </a>
+                  </ng-container>
+
+                  <button class="btn btn-ghost btn-xs text-danger" (click)="deleteRequestRecord(req)">
+                    🗑️
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: PRO LICENSES -->
+    <div *ngIf="activeTab === 'licenses'" class="tab-content animate-fade-in">
+      <div class="controls-bar">
+        <div class="stats-label">
+          Total Licenses in Firebase: <strong>{{ licenses.length }}</strong> (Active: <strong>{{ activeLicensesCount }}</strong>)
+        </div>
+
+        <div class="search-wrap">
+          <input 
+            type="text" 
+            [(ngModel)]="searchQuery" 
+            placeholder="Search license, email, phone, UTR..." 
+            class="form-input search-input"
+          />
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>License Key</th>
+              <th>Owner / Contact</th>
+              <th>Bank UTR</th>
+              <th>Plan</th>
+              <th>Status</th>
+              <th>Activations</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="filteredLicenses.length === 0">
+              <td colspan="8" class="text-center py-4">No licenses found in database.</td>
+            </tr>
+            <tr *ngFor="let lic of filteredLicenses">
+              <td>
+                <div class="key-cell">
+                  <code class="license-highlight">{{ lic.licenseKey }}</code>
+                  <button class="copy-tiny" (click)="copyToClipboard(lic.licenseKey)">📋</button>
+                </div>
+              </td>
+              <td>
+                <div class="user-cell">
+                  <strong>{{ lic.userName || 'Customer' }}</strong>
+                  <span class="sub-contact">📞 {{ lic.userPhone }}</span>
+                  <span class="sub-contact">✉️ {{ lic.userEmail }}</span>
+                </div>
+              </td>
+              <td>
+                <code class="utr-code">{{ lic.utrNumber || '—' }}</code>
+              </td>
+              <td>
+                <span class="plan-badge">{{ lic.plan }}</span>
+              </td>
+              <td>
+                <span class="status-pill" [ngClass]="lic.status">
+                  {{ lic.status | uppercase }}
+                </span>
+              </td>
+              <td>
+                <span class="activation-pill">{{ lic.activatedCount || 0 }} / {{ lic.maxActivations || 3 }}</span>
+              </td>
+              <td>
+                <span class="date-text">{{ lic.createdAt | date:'shortDate' }}</span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <a 
+                    *ngIf="lic.userPhone && lic.userPhone !== 'N/A'"
+                    [href]="getWhatsAppSendUrl(lic.userPhone, lic.userName, lic.licenseKey)" 
+                    target="_blank" 
+                    class="btn btn-whatsapp btn-xs"
+                    title="Send via WhatsApp"
+                  >
+                    💬 WhatsApp
+                  </a>
+                  <button 
+                    *ngIf="lic.status === 'active'" 
+                    class="btn btn-outline-danger btn-xs" 
+                    (click)="revokeLicense(lic)"
+                  >
+                    Revoke
+                  </button>
+                  <button 
+                    *ngIf="lic.status === 'revoked'" 
+                    class="btn btn-secondary btn-xs" 
+                    (click)="reActivateLicense(lic)"
+                  >
+                    Re-Activate
+                  </button>
+                  <button 
+                    class="btn btn-ghost btn-xs text-danger" 
+                    (click)="deleteLicenseRecord(lic)"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 4: LIVE FIREBASE RESPONSES (JSON) -->
+    <div *ngIf="activeTab === 'firebase_json'" class="tab-content animate-fade-in">
+      <div class="json-viewer-header">
+        <div>
+          <h3>📡 Live Firebase Realtime Database Responses</h3>
+          <p class="sub-text">This displays the exact live JSON response payloads returned from your Firebase REST API endpoints.</p>
+        </div>
+        <div class="json-actions">
+          <button class="btn btn-outline btn-sm" (click)="loadAllData()">
+            🔄 Refresh Responses
+          </button>
+          <button class="btn btn-primary btn-sm" (click)="copyToClipboard(rawRequestsJson + '\n\n' + rawLicensesJson)">
+            📋 Copy Entire Database JSON
+          </button>
+        </div>
+      </div>
+
+      <div class="json-sections-grid">
+        <!-- pro_requests node -->
+        <div class="json-box">
+          <div class="json-box-top">
+            <strong>Endpoint: <code>/pro_requests.json</code></strong>
+            <button class="btn btn-ghost btn-xs" (click)="copyToClipboard(rawRequestsJson)">Copy</button>
+          </div>
+          <pre class="json-display"><code>{{ rawRequestsJson }}</code></pre>
+        </div>
+
+        <!-- licenses node -->
+        <div class="json-box">
+          <div class="json-box-top">
+            <strong>Endpoint: <code>/licenses.json</code></strong>
+            <button class="btn btn-ghost btn-xs" (click)="copyToClipboard(rawLicensesJson)">Copy</button>
+          </div>
+          <pre class="json-display"><code>{{ rawLicensesJson }}</code></pre>
+        </div>
+
+        <!-- pricing_plans node -->
+        <div class="json-box">
+          <div class="json-box-top">
+            <strong>Endpoint: <code>/pricing_plans.json</code></strong>
+            <button class="btn btn-ghost btn-xs" (click)="copyToClipboard(rawPlansJson)">Copy</button>
+          </div>
+          <pre class="json-display"><code>{{ rawPlansJson }}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: MANUAL PRO KEY GENERATOR -->
+    <div *ngIf="activeTab === 'generate'" class="tab-content animate-fade-in">
+      <div class="form-container-card">
+        <h3>⚡ Issue New Pro License Key</h3>
+        <p class="form-desc">Directly create an approved license in the Firebase Database for VIP users, offline payments, or corporate accounts.</p>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">User Full Name <span class="required">*</span></label>
+            <input 
+              type="text" 
+              [(ngModel)]="newLicense.userName" 
+              placeholder="e.g. Rahul Sharma" 
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Phone / WhatsApp Number</label>
+            <input 
+              type="tel" 
+              [(ngModel)]="newLicense.userPhone" 
+              placeholder="e.g. 9876543210" 
+              class="form-input"
+            />
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input 
+              type="email" 
+              [(ngModel)]="newLicense.userEmail" 
+              placeholder="e.g. rahul@example.com" 
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Bank UTR / Transaction Ref</label>
+            <input 
+              type="text" 
+              [(ngModel)]="newLicense.utrNumber" 
+              placeholder="e.g. 423984102938 / CASH / GPAY" 
+              class="form-input"
+            />
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Plan Type</label>
+            <select [(ngModel)]="newLicense.plan" class="form-input">
+              <option value="pro_lifetime">Pro Lifetime (₹299)</option>
+              <option value="enterprise">Enterprise VIP</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Admin Notes</label>
+            <input 
+              type="text" 
+              [(ngModel)]="newLicense.notes" 
+              placeholder="e.g. Direct bank transfer verified by Surya" 
+              class="form-input"
+            />
+          </div>
+        </div>
+
+        <div *ngIf="generateError" class="error-banner animate-fade-in">{{ generateError }}</div>
+
+        <div *ngIf="generatedKeySuccess" class="success-callout animate-fade-in">
+          <div class="success-top">
+            <span class="check-mark">🎉</span>
+            <strong>License Generated & Added to Database:</strong>
+          </div>
+          <div class="generated-key-display">
+            <code>{{ generatedKeySuccess }}</code>
+            <button class="btn btn-outline btn-sm" (click)="copyToClipboard(generatedKeySuccess)">
+              Copy Key
+            </button>
+            <a 
+              *ngIf="newLicense.userPhone"
+              [href]="getWhatsAppSendUrl(newLicense.userPhone, newLicense.userName, generatedKeySuccess)" 
+              target="_blank" 
+              class="btn btn-whatsapp btn-sm"
+            >
+              💬 Send to User on WhatsApp
+            </a>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button 
+            class="btn btn-primary btn-lg" 
+            [disabled]="generateSubmitting"
+            (click)="generateManualLicense()"
+          >
+            <span *ngIf="!generateSubmitting">Issue & Save to Firebase Database →</span>
+            <span *ngIf="generateSubmitting">Generating...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: SETTINGS -->
+    <div *ngIf="activeTab === 'settings'" class="tab-content animate-fade-in">
+      <div class="form-container-card">
+        <h3>⚙️ Firebase Realtime Database Configuration</h3>
+        <p class="form-desc">
+          Configure the Firebase Realtime Database REST API endpoint used for storing Pro payment requests and validating license keys.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label">Firebase Database URL</label>
+          <input 
+            type="text" 
+            [(ngModel)]="databaseUrl" 
+            placeholder="https://your-project-default-rtdb.firebaseio.com" 
+            class="form-input"
+          />
+          <span class="input-hint">
+            Format: <code>https://&lt;PROJECT-ID&gt;-default-rtdb.firebaseio.com</code> without trailing slash.
+          </span>
+        </div>
+
+        <div *ngIf="dbTestStatus !== 'idle'" class="test-result-box" [ngClass]="dbTestStatus">
+          {{ dbTestMessage }}
+        </div>
+
+        <div class="settings-actions">
+          <button class="btn btn-outline" (click)="testDatabaseConnection()">
+            Test Connection
+          </button>
+          <button class="btn btn-primary" (click)="saveDatabaseSettings()">
+            Save URL Configuration
+          </button>
+        </div>
+
+        <div class="rules-help-card">
+          <h4>Firebase Realtime Database Security Rules</h4>
+          <pre class="code-block"><code>{{ '{' }}
+  "rules": {{ '{' }}
+    "pro_requests": {{ '{' }}
+      ".read": true,
+      ".write": true
+    {{ '}' }},
+    "licenses": {{ '{' }}
+      ".read": true,
+      ".write": true
+    {{ '}' }}
+  {{ '}' }}
+{{ '}' }}</code></pre>
+        </div>
+      </div>
+    </div>
+
+      </div> <!-- /.stage-body -->
+    </main> <!-- /.admin-main-stage -->
+  </div> <!-- /.admin-layout-shell -->
+
+<!-- ==========================================
+     UTR VERIFICATION & KEY DISPATCH MODAL
+     ========================================== -->
+<div *ngIf="selectedRequest" class="modal-overlay animate-fade-in" (click)="closeVerifyModal()">
+  <div class="verify-modal-dialog" (click)="$event.stopPropagation()">
+    <div class="verify-modal-header">
+      <div class="modal-title-group">
+        <h3>Bank UTR Verification & Key Dispatch</h3>
+        <span class="sub-id">Request ID: {{ selectedRequest.requestId }}</span>
+      </div>
+      <button class="close-btn" (click)="closeVerifyModal()">✕</button>
+    </div>
+
+    <div class="verify-modal-body">
+      <!-- User Details Card -->
+      <div class="customer-info-box">
+        <div class="info-row">
+          <span class="info-label">Customer Name:</span>
+          <strong>{{ selectedRequest.userName }}</strong>
+        </div>
+        <div class="info-row">
+          <span class="info-label">WhatsApp / Phone:</span>
+          <strong>{{ selectedRequest.userPhone }}</strong>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Email:</span>
+          <span>{{ selectedRequest.userEmail }}</span>
+        </div>
+        <div class="info-row" *ngIf="selectedRequest.userCompany">
+          <span class="info-label">Company:</span>
+          <span>{{ selectedRequest.userCompany }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Amount Paid:</span>
+          <strong class="text-success">₹{{ selectedRequest.amount || 299 }}</strong>
+        </div>
+      </div>
+
+      <!-- Bank UTR Check Highlight -->
+      <div class="utr-verify-highlight">
+        <div class="utr-title">12-Digit Bank UTR / Reference:</div>
+        <div class="utr-number-box">
+          <code>{{ selectedRequest.utrNumber }}</code>
+          <button class="btn btn-outline btn-xs" (click)="copyToClipboard(selectedRequest.utrNumber)">
+            📋 Copy UTR
+          </button>
+        </div>
+        <p class="utr-instruction">
+          👉 Check your SBI / Bank Statement for credit of ₹{{ selectedRequest.amount || 299 }} with this UTR.
+        </p>
+      </div>
+
+      <!-- If key is already generated or ready to issue -->
+      <div *ngIf="issuedKeyResult" class="generated-key-section animate-fade-in">
+        <div class="key-badge-header">
+          <span>✓ Official License Key Generated & Saved to Firebase:</span>
+        </div>
+        <div class="key-display-card">
+          <code class="big-key">{{ issuedKeyResult }}</code>
+          <button class="btn btn-outline btn-sm" (click)="copyToClipboard(issuedKeyResult)">
+            📋 Copy Key
+          </button>
+        </div>
+
+        <div class="delivery-actions">
+          <div class="delivery-title">Send Key to Customer:</div>
+          <div class="delivery-buttons-row">
+            <a 
+              [href]="getWhatsAppSendUrl(selectedRequest.userPhone, selectedRequest.userName, issuedKeyResult)" 
+              target="_blank" 
+              class="btn btn-whatsapp btn-lg"
+            >
+              💬 Send Key via WhatsApp ({{ selectedRequest.userPhone }})
+            </a>
+            <a 
+              [href]="getEmailSendUrl(selectedRequest.userEmail, selectedRequest.userName, issuedKeyResult)" 
+              target="_blank" 
+              class="btn btn-outline btn-lg"
+            >
+              ✉️ Send Key via Email
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- If not yet approved -->
+      <div *ngIf="!issuedKeyResult" class="modal-verify-actions">
+        <button 
+          class="btn btn-primary btn-full btn-lg" 
+          [disabled]="verifyingSubmitting"
+          (click)="confirmUtrAndIssueKey()"
+        >
+          <span *ngIf="!verifyingSubmitting">✓ Confirm UTR Verified & Generate Pro Key →</span>
+          <span *ngIf="verifyingSubmitting">Saving to Firebase Database...</span>
+        </button>
+
+        <button class="btn btn-outline-danger btn-full mt-2" (click)="rejectPayment(selectedRequest)">
+          ✕ Mark UTR as Invalid / Reject
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================
+     MODAL 1: BLOCK USER CONFIRMATION MODAL
+     ========================================== -->
+<div *ngIf="selectedUserForBlock" class="modal-overlay animate-fade-in" (click)="closeBlockModal()">
+  <div class="verify-modal-dialog block-user-dialog" (click)="$event.stopPropagation()">
+    <div class="verify-modal-header danger-header">
+      <div class="modal-title-group">
+        <h3>Block User Pro Access</h3>
+        <span class="sub-id">License: {{ selectedUserForBlock.licenseKey }}</span>
+      </div>
+      <button class="close-btn" (click)="closeBlockModal()">✕</button>
+    </div>
+
+    <div class="verify-modal-body">
+      <div class="customer-info-box">
+        <div class="info-row">
+          <span class="info-label">Customer Name:</span>
+          <strong>{{ selectedUserForBlock.userName }}</strong>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Contact:</span>
+          <span>{{ selectedUserForBlock.userPhone }} &bull; {{ selectedUserForBlock.userEmail }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Plan:</span>
+          <strong>{{ getPlanName(selectedUserForBlock.plan) }} ({{ formatInterval(selectedUserForBlock.billingInterval) }})</strong>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Active Devices:</span>
+          <span>{{ selectedUserForBlock.activatedCount || 0 }} / {{ selectedUserForBlock.maxActivations || 2 }} devices</span>
+        </div>
+      </div>
+
+      <div class="warning-callout">
+        <strong>Security Notice:</strong> Blocking this account immediately revokes Pro features on all activated browsers and devices. Realtime Database checks will block requests from this key.
+      </div>
+
+      <div class="form-group mt-3 text-left">
+        <label class="form-label">Reason for Administrative Block <span class="required">*</span></label>
+        <textarea 
+          [(ngModel)]="blockReasonInput" 
+          rows="3" 
+          placeholder="e.g. Terms violation, unauthorized key sharing, dispute or refund"
+          class="form-input"
+        ></textarea>
+      </div>
+
+      <div class="modal-verify-actions mt-3">
+        <button 
+          class="btn btn-danger btn-full btn-lg" 
+          [disabled]="blockSubmitting"
+          (click)="confirmBlockUser()"
+        >
+          <span *ngIf="!blockSubmitting">Confirm Block Account</span>
+          <span *ngIf="blockSubmitting">Blocking in Database...</span>
+        </button>
+        <button class="btn btn-outline btn-full mt-2" (click)="closeBlockModal()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================
+     MODAL 2: CHANGE PLAN & SUBSCRIPTION MODAL
+     ========================================== -->
+<div *ngIf="selectedUserForPlanChange" class="modal-overlay animate-fade-in" (click)="closeChangePlanModal()">
+  <div class="verify-modal-dialog" (click)="$event.stopPropagation()">
+    <div class="verify-modal-header">
+      <div class="modal-title-group">
+        <h3>Update Subscription Plan</h3>
+        <span class="sub-id">User: {{ selectedUserForPlanChange.userName }}</span>
+      </div>
+      <button class="close-btn" (click)="closeChangePlanModal()">✕</button>
+    </div>
+
+    <div class="verify-modal-body">
+      <div class="customer-info-box">
+        <div class="info-row">
+          <span class="info-label">Current Plan:</span>
+          <strong>{{ getPlanName(selectedUserForPlanChange.plan) }}</strong>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Current Frequency:</span>
+          <span class="plan-frequency-pill" [ngClass]="'freq-' + (selectedUserForPlanChange.billingInterval || 'lifetime')">
+            {{ formatInterval(selectedUserForPlanChange.billingInterval) }}
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Current Expiry:</span>
+          <span>{{ getExpiryBadge(selectedUserForPlanChange).text }}</span>
+        </div>
+      </div>
+
+      <div class="form-group mt-3 text-left">
+        <label class="form-label">Select Destination Plan <span class="required">*</span></label>
+        <select 
+          [(ngModel)]="changePlanSelectedId" 
+          (change)="onPlanSelectedInModal()" 
+          class="form-input"
+        >
+          <option *ngFor="let p of plans" [value]="p.id">
+            {{ p.name }} — ₹{{ p.amount }} ({{ formatInterval(p.billingInterval) }})
+          </option>
+        </select>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group text-left">
+          <label class="form-label">Plan Amount (₹ INR)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="changePlanAmount" 
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-group text-left">
+          <label class="form-label">Billing Frequency</label>
+          <select [(ngModel)]="changePlanInterval" class="form-input">
+            <option value="monthly">Monthly (30 Days)</option>
+            <option value="yearly">Yearly (365 Days)</option>
+            <option value="lifetime">Lifetime (Unlimited)</option>
+            <option value="quarterly">Quarterly (90 Days)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group text-left" *ngIf="changePlanInterval !== 'lifetime'">
+        <label class="form-label">Validity Duration (Days from Today)</label>
+        <div class="input-with-quick-buttons">
+          <input 
+            type="number" 
+            [(ngModel)]="changePlanValidityDays" 
+            class="form-input"
+          />
+          <div class="quick-days-pills">
+            <button type="button" class="btn btn-outline btn-xs" (click)="changePlanValidityDays = 30">30d</button>
+            <button type="button" class="btn btn-outline btn-xs" (click)="changePlanValidityDays = 90">90d</button>
+            <button type="button" class="btn btn-outline btn-xs" (click)="changePlanValidityDays = 365">1 Year</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group text-left">
+        <label class="form-label">Admin Change Notes</label>
+        <input 
+          type="text" 
+          [(ngModel)]="changePlanNotes" 
+          placeholder="e.g. Plan upgraded per customer request" 
+          class="form-input"
+        />
+      </div>
+
+      <div class="modal-verify-actions mt-3">
+        <button 
+          class="btn btn-primary btn-full btn-lg" 
+          [disabled]="changePlanSubmitting"
+          (click)="confirmChangePlan()"
+        >
+          <span *ngIf="!changePlanSubmitting">Save Plan Changes</span>
+          <span *ngIf="changePlanSubmitting">Updating in Database...</span>
+        </button>
+        <button class="btn btn-outline btn-full mt-2" (click)="closeChangePlanModal()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================
+     MODAL 3: PAID USER DETAILS & DEVICES MODAL
+     ========================================== -->
+<div *ngIf="selectedUserForDetails" class="modal-overlay animate-fade-in" (click)="closeUserDetailModal()">
+  <div class="verify-modal-dialog" (click)="$event.stopPropagation()">
+    <div class="verify-modal-header">
+      <div class="modal-title-group">
+        <h3>Subscriber Profile & Devices</h3>
+        <span class="sub-id">{{ selectedUserForDetails.userName }}</span>
+      </div>
+      <button class="close-btn" (click)="closeUserDetailModal()">✕</button>
+    </div>
+
+    <div class="verify-modal-body">
+      <div class="customer-info-box">
+        <div class="info-row">
+          <span class="info-label">Customer Name:</span>
+          <strong>{{ selectedUserForDetails.userName }}</strong>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Phone:</span>
+          <span>{{ selectedUserForDetails.userPhone }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Email:</span>
+          <span>{{ selectedUserForDetails.userEmail }}</span>
+        </div>
+        <div class="info-row" *ngIf="selectedUserForDetails.userCompany">
+          <span class="info-label">Company:</span>
+          <span>{{ selectedUserForDetails.userCompany }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Plan & Interval:</span>
+          <strong class="text-primary">{{ getPlanName(selectedUserForDetails.plan) }} ({{ formatInterval(selectedUserForDetails.billingInterval) }})</strong>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Amount Paid:</span>
+          <strong class="text-success">₹{{ selectedUserForDetails.amount }}</strong>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Status:</span>
+          <span class="status-badge" [ngClass]="selectedUserForDetails.status">
+            <span class="badge-dot"></span>
+            <span>{{ selectedUserForDetails.status === 'active' ? 'Active' : (selectedUserForDetails.status === 'blocked' ? 'Blocked' : selectedUserForDetails.status) }}</span>
+          </span>
+        </div>
+        <div class="info-row" *ngIf="selectedUserForDetails.blockReason">
+          <span class="info-label">Block Reason:</span>
+          <span class="text-danger">{{ selectedUserForDetails.blockReason }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Validity / Expiry:</span>
+          <span>{{ getExpiryBadge(selectedUserForDetails).text }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Created:</span>
+          <span>{{ selectedUserForDetails.createdAt | date:'medium' }}</span>
+        </div>
+        <div class="info-row" *ngIf="selectedUserForDetails.utrNumber">
+          <span class="info-label">Bank UTR:</span>
+          <code>{{ selectedUserForDetails.utrNumber }}</code>
+        </div>
+      </div>
+
+      <!-- License Key Highlight -->
+      <div class="utr-verify-highlight mt-3">
+        <div class="utr-title">License Key:</div>
+        <div class="utr-number-box">
+          <code class="license-code">{{ selectedUserForDetails.licenseKey }}</code>
+          <button class="btn btn-outline btn-xs" (click)="copyToClipboard(selectedUserForDetails.licenseKey)">
+            Copy Key
+          </button>
+        </div>
+      </div>
+
+      <!-- Activated Devices List -->
+      <div class="devices-section mt-3">
+        <h4>Activated Devices ({{ (selectedUserForDetails.activatedDevices || []).length }} / {{ selectedUserForDetails.maxActivations || 2 }} allowed):</h4>
+        <div *ngIf="(!selectedUserForDetails.activatedDevices || selectedUserForDetails.activatedDevices.length === 0)" class="text-muted text-sm py-2">
+          No devices activated yet.
+        </div>
+        <div *ngFor="let dev of selectedUserForDetails.activatedDevices; let i = index" class="device-item">
+          <span>Device #{{ i + 1 }}:</span>
+          <code>{{ dev }}</code>
+        </div>
+      </div>
+
+      <div class="delivery-actions mt-3">
+        <div class="delivery-buttons-row">
+          <a 
+            *ngIf="selectedUserForDetails.userPhone && selectedUserForDetails.userPhone !== 'N/A'"
+            [href]="getWhatsAppSendUrl(selectedUserForDetails.userPhone, selectedUserForDetails.userName, selectedUserForDetails.licenseKey)" 
+            target="_blank" 
+            class="btn btn-whatsapp btn-sm"
+          >
+            WhatsApp User
+          </a>
+          <a 
+            *ngIf="selectedUserForDetails.userEmail"
+            [href]="getEmailSendUrl(selectedUserForDetails.userEmail, selectedUserForDetails.userName, selectedUserForDetails.licenseKey)" 
+            target="_blank" 
+            class="btn btn-outline btn-sm"
+          >
+            Email User
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div> <!-- /.admin-container -->

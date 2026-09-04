@@ -1,6 +1,7 @@
-<div class="app-shell">
-  <!-- Top Global Navigation Bar -->
+<div class="app-shell" [class.admin-route-shell]="isAdminRoute">
+  <!-- Top Global Navigation Bar (Public routes only) -->
   <app-navbar
+    *ngIf="!isAdminRoute"
     (openHelp)="openHelp()"
     (openSecurity)="openSecurity()"
     (openPro)="openPro()"
@@ -8,13 +9,13 @@
     (openContact)="openContact()"
   ></app-navbar>
 
-  <!-- Routed Main Application View (Home, Category, Tool Pages, Compare) -->
-  <main class="main-content">
+  <!-- Routed Main Application View (Home, Category, Tool Pages, Compare, Admin) -->
+  <main class="main-content" [class.admin-main-full]="isAdminRoute">
     <router-outlet></router-outlet>
   </main>
 
-  <!-- Global Footer -->
-  <app-footer></app-footer>
+  <!-- Global Footer (Public routes only) -->
+  <app-footer *ngIf="!isAdminRoute"></app-footer>
 
   <!-- Global Overlay Modals -->
   <app-help-modal *ngIf="showHelpModal" (close)="showHelpModal = false"></app-help-modal>
