@@ -17,10 +17,10 @@
         <div class="direct-chat-callout">
           <div class="chat-text">
             <strong>Need instant resolution?</strong>
-            <span>Chat directly with Surya on WhatsApp (Payment, UTR, Pro Key verification)</span>
+            <span>Email Surya directly at devsurya8470@gmail.com (Payment, UTR, Pro Key verification)</span>
           </div>
-          <a [href]="whatsAppComplaintUrl" target="_blank" class="btn-whatsapp">
-            💬 WhatsApp Surya
+          <a [href]="emailComplaintUrl" class="btn-whatsapp">
+            ✉️ Email Surya
           </a>
         </div>
 
@@ -36,10 +36,10 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Email or Phone Number</label>
+            <label class="form-label">Email Address</label>
             <input 
-              type="text" 
-              placeholder="e.g. yourname@email.com or +91..." 
+              type="email" 
+              placeholder="e.g. yourname@email.com" 
               [(ngModel)]="emailOrPhone" 
               class="form-input"
             />
@@ -95,11 +95,11 @@
         <h3>Complaint Ticket Logged!</h3>
         <div class="ticket-badge">Ticket Reference: {{ ticketId }}</div>
         <p>
-          Thank you. Your request has been forwarded to our support queue. You will receive an email/WhatsApp update shortly.
+          Thank you. Your request has been forwarded to our support queue. You will receive an email update shortly.
         </p>
         <div class="confirm-actions">
-          <a [href]="whatsAppComplaintUrl" target="_blank" class="btn btn-primary">
-            💬 Send Copy to WhatsApp
+          <a [href]="emailComplaintUrl" class="btn btn-primary">
+            ✉️ Send Copy via Email
           </a>
           <button class="btn btn-secondary" (click)="resetForm()">
             Done

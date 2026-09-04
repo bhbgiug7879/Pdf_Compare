@@ -18,16 +18,22 @@ export class ContactModalComponent {
   isSubmitting = false;
   ticketId = '';
 
-  whatsAppNumber = '917010199142';
+  supportEmail = 'devsurya8470@gmail.com';
 
-  get whatsAppComplaintUrl(): string {
-    const text = `*PDF Master Support Request / Complaint*\n` +
+  get emailComplaintUrl(): string {
+    const subject = encodeURIComponent(`PDF Master Support Request: ${this.issueCategory}`);
+    const text = `PDF Master Support Request / Complaint\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
       `• Issue: ${this.issueCategory}\n` +
       `• Name: ${this.fullName || 'User'}\n` +
       `• Contact: ${this.emailOrPhone || 'N/A'}\n` +
       (this.utrReference ? `• UTR / Payment Ref: ${this.utrReference}\n` : '') +
       `• Description: ${this.description || 'Assistance needed'}`;
-    return `https://wa.me/${this.whatsAppNumber}?text=${encodeURIComponent(text)}`;
+    return `mailto:${this.supportEmail}?subject=${subject}&body=${encodeURIComponent(text)}`;
+  }
+
+  get whatsAppComplaintUrl(): string {
+    return this.emailComplaintUrl;
   }
 
   submitComplaint(): void {

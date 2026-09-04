@@ -22,7 +22,7 @@ export class ProModalComponent implements OnInit {
   upiId: string = 'suryarathiga111@oksbi';
   payeeName: string = 'Suryarathiga';
   proPriceInr: number = 299;
-  whatsAppNumber: string = '917010199142';
+  supportEmail: string = 'devsurya8470@gmail.com';
 
   // Dynamic Plans from Firebase
   availablePlans: PricingPlan[] = [];
@@ -65,25 +65,30 @@ export class ProModalComponent implements OnInit {
     return `https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=10&data=${encodeURIComponent(this.upiPaymentString)}`;
   }
 
-  get whatsAppVerificationUrl(): string {
+  get emailVerificationUrl(): string {
     const reqId = this.pendingRequest?.requestId || 'REQ-' + Math.floor(100000 + Math.random() * 900000);
     const name = this.userName || this.pendingRequest?.userName || 'User';
-    const phone = this.userPhone || this.pendingRequest?.userPhone || 'N/A';
     const email = this.userEmail || this.pendingRequest?.userEmail || 'N/A';
     const utr = this.enteredUtr || this.pendingRequest?.utrNumber || '[UTR Number]';
 
-    const msg = `*PDF MASTER PRO — PAYMENT APPROVAL REQUEST*\n` +
+    const subject = encodeURIComponent(`PDF Master Pro — Payment Approval Request (${reqId})`);
+    const body = encodeURIComponent(
+      `PDF MASTER PRO — PAYMENT APPROVAL REQUEST\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `• *Payee*: ${this.payeeName} (${this.upiId})\n` +
-      `• *Amount Paid*: ₹${this.proPriceInr}\n` +
-      `• *Bank 12-Digit UTR*: ${utr}\n` +
-      `• *User Name*: ${name}\n` +
-      `• *Phone*: ${phone}\n` +
-      `• *Email*: ${email}\n` +
-      `• *Request ID*: ${reqId}\n` +
+      `• Payee: ${this.payeeName} (${this.upiId})\n` +
+      `• Amount Paid: ₹${this.proPriceInr}\n` +
+      `• Bank 12-Digit UTR: ${utr}\n` +
+      `• User Name: ${name}\n` +
+      `• Email: ${email}\n` +
+      `• Request ID: ${reqId}\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `Hi Surya, I have completed the ₹${this.proPriceInr} UPI payment. Please verify the credit in your SBI account and approve my Pro License Key.`;
-    return `https://wa.me/${this.whatsAppNumber}?text=${encodeURIComponent(msg)}`;
+      `Hi Surya, I have completed the ₹${this.proPriceInr} UPI payment. Please verify the credit in your account and approve my Pro License Key.`
+    );
+    return `mailto:${this.supportEmail}?subject=${subject}&body=${body}`;
+  }
+
+  get whatsAppVerificationUrl(): string {
+    return this.emailVerificationUrl;
   }
 
   constructor(
@@ -242,8 +247,8 @@ export class ProModalComponent implements OnInit {
       const adminLicense: ProLicenseRecord = {
         licenseKey: adminKey,
         userName: this.userName || 'Admin Surya',
-        userEmail: this.userEmail || 'surya@admin.com',
-        userPhone: this.userPhone || '917010199142',
+        userEmail: this.userEmail || 'devsurya8470@gmail.com',
+        userPhone: this.userPhone || '',
         plan: 'pro_lifetime',
         amount: 299,
         status: 'active',

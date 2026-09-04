@@ -607,7 +607,7 @@ export class FirebaseLicenseService {
       if (activatedDevices.length >= maxActivations) {
         return {
           valid: false,
-          message: `❌ Activation Limit Exceeded: This unique license is already active on the maximum allowed device(s) (${maxActivations}). Please message Surya (+91 7010199142) if you changed devices.`
+          message: `❌ Activation Limit Exceeded: This unique license is already active on the maximum allowed device(s) (${maxActivations}). Please email Surya (devsurya8470@gmail.com) if you changed devices.`
         };
       }
       activatedDevices.push(currentDeviceId);

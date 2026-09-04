@@ -158,13 +158,13 @@ export class AdminComponent implements OnInit {
     }
   }
 
-  // --- AUTHENTICATION: techiesurya / nadhansurya0620@gmail.com with Surya@2000 ---
+  // --- AUTHENTICATION: techiesurya / devsurya8470@gmail.com with Surya@2000 ---
   verifyCredentials(): void {
     this.loginError = null;
     const user = this.adminUsername.trim().toLowerCase();
     const pass = this.adminPassword;
 
-    const isValidUser = (user === 'techiesurya' || user === 'nadhansurya0620@gmail.com');
+    const isValidUser = (user === 'techiesurya' || user === 'devsurya8470@gmail.com' || user === 'nadhansurya0620@gmail.com');
     const isValidPass = (pass === 'Surya@2000');
 
     if (isValidUser && isValidPass) {
@@ -172,7 +172,7 @@ export class AdminComponent implements OnInit {
       this.loadAllData();
       this.showToast('Welcome Admin Surya! Access granted.', 'success');
     } else {
-      this.loginError = 'Access Denied: Invalid Username or Password. Allowed: techiesurya / Surya@2000.';
+      this.loginError = 'Access Denied: Invalid Username or Password.';
     }
   }
 
